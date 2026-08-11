@@ -1,16 +1,18 @@
 "use client";
 
-import { getWhatsAppUrl } from "@/lib/config";
-import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getWhatsAppUrl } from "@/lib/config";
+import { saveLead } from "@/lib/leads";
 
-function WhatsAppIcon() {
+function WhatsAppIcon({ size = 28 }: { size?: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 32 32"
-      width="28"
-      height="28"
+      width={size}
+      height={size}
       fill="white"
       aria-hidden="true"
     >
@@ -19,26 +21,112 @@ function WhatsAppIcon() {
   );
 }
 
+const inputClass =
+  "w-full border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400 transition-colors rounded-none";
+
 export function WhatsAppButton() {
   const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ name: "", whatsapp: "", email: "" });
 
   useEffect(() => {
     const timer = setTimeout(() => setVisible(true), 1500);
     return () => clearTimeout(timer);
   }, []);
 
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const message = `Olá! Vim pelo site da FGR Imóveis e gostaria de mais informações.\n\nNome: ${form.name}\nWhatsApp: ${form.whatsapp}`;
+    await saveLead({
+      name: form.name,
+      phone: form.whatsapp,
+      email: form.email || undefined,
+      message,
+      source: "whatsapp_flutuante",
+    });
+    window.open(getWhatsAppUrl(message), "_blank");
+    setOpen(false);
+    setForm({ name: "", whatsapp: "", email: "" });
+    setLoading(false);
+  }
+
   return (
-    <a
-      href={getWhatsAppUrl()}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Falar pelo WhatsApp"
+    <div
       className={cn(
-        "fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] text-white shadow-xl hover:bg-[#20bd5a] hover:scale-110 transition-all duration-300",
+        "fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 transition-all duration-300",
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
     >
-      <WhatsAppIcon />
-    </a>
+      {open && (
+        <div className="w-72 bg-white shadow-2xl border border-neutral-100 overflow-hidden">
+          {/* Header */}
+          <div className="bg-[#25D366] px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <WhatsAppIcon size={22} />
+              <span className="text-white font-semibold text-sm">
+                Fale pelo WhatsApp
+              </span>
+            </div>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-white/80 hover:text-white transition-colors"
+              aria-label="Fechar"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-4 flex flex-col gap-3">
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Seu nome *"
+              required
+              className={inputClass}
+            />
+            <input
+              name="whatsapp"
+              type="tel"
+              value={form.whatsapp}
+              onChange={handleChange}
+              placeholder="Seu WhatsApp *"
+              required
+              className={inputClass}
+            />
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="E-mail (opcional)"
+              className={inputClass}
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#25D366] text-white font-semibold py-3 text-sm hover:bg-[#20bd5a] transition-colors disabled:opacity-60"
+            >
+              {loading ? "Aguarde..." : "Iniciar conversa"}
+            </button>
+          </form>
+        </div>
+      )}
+
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        aria-label="Falar pelo WhatsApp"
+        className="flex items-center justify-center w-14 h-14 rounded-full bg-[#25D366] shadow-xl hover:bg-[#20bd5a] hover:scale-110 transition-all duration-300"
+      >
+        <WhatsAppIcon />
+      </button>
+    </div>
   );
 }

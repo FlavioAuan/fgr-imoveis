@@ -210,7 +210,12 @@ export default async function PropertyPage({ params }: Props) {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <PropertyContactForm propertyTitle={property.title} propertyCode={property.code} />
+              <PropertyContactForm
+                propertyTitle={property.title}
+                propertyCode={property.code}
+                propertyId={Number(row.id)}
+                propertySlug={slug}
+              />
             </div>
           </div>
         </div>
