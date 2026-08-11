@@ -37,10 +37,8 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled
-          ? "bg-white/95 backdrop-blur-sm shadow-sm"
-          : "bg-white/95 backdrop-blur-sm"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white",
+        scrolled ? "shadow-sm" : ""
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,11 +88,11 @@ export function Header() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "lg:hidden fixed inset-0 top-16 bg-white z-40 transition-all duration-300",
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          "lg:hidden absolute left-0 right-0 top-full bg-white border-t border-neutral-100 shadow-lg overflow-hidden transition-all duration-300",
+          mobileOpen ? "max-h-screen" : "max-h-0"
         )}
       >
-        <nav className="flex flex-col px-6 py-8 gap-1">
+        <nav className="flex flex-col px-6 py-4 gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -105,12 +103,12 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <div className="mt-6">
+          <div className="py-4">
             <a
               href={getWhatsAppUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full bg-neutral-900 text-white font-medium py-4 mt-2"
+              className="flex items-center justify-center gap-2 w-full bg-neutral-900 text-white font-medium py-4"
             >
               <MessageCircle size={18} />
               Fale conosco pelo WhatsApp
