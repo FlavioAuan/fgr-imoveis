@@ -1,15 +1,24 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PropertyCard } from "@/components/properties/PropertyCard";
-import { getFeaturedProperties } from "@/data/properties";
+import { query } from "@/lib/db";
+import { mapDBToProperty } from "@/lib/propertyMapper";
 
-export function FeaturedProperties() {
-  const featured = getFeaturedProperties();
+export async function FeaturedProperties() {
+  const rows = await query<Record<string, unknown>>(
+    `SELECT p.*,
+      (SELECT image_path FROM property_images WHERE property_id=p.id AND is_cover=1 LIMIT 1) AS cover_image
+     FROM properties p
+     WHERE p.featured=1 AND p.status='disponivel'
+     ORDER BY p.created_at DESC
+     LIMIT 8`
+  );
+
+  const featured = rows.map((row) => mapDBToProperty(row));
 
   return (
     <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
           <div>
             <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-3">
@@ -19,8 +28,7 @@ export function FeaturedProperties() {
               Imóveis em destaque
             </h2>
             <p className="text-neutral-500 mt-3 max-w-md">
-              Confira algumas das melhores oportunidades selecionadas pela FGR
-              Imóveis.
+              Confira algumas das melhores oportunidades selecionadas pela FGR Imóveis.
             </p>
           </div>
           <Link
@@ -32,14 +40,16 @@ export function FeaturedProperties() {
           </Link>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {featured.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        {featured.length === 0 ? (
+          <p className="text-neutral-400 text-sm">Nenhum imóvel em destaque no momento.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {featured.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
 
-        {/* CTA mobile */}
         <div className="mt-10 text-center sm:hidden">
           <Link
             href="/imoveis"

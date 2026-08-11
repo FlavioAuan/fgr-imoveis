@@ -1,62 +1,65 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import {
-  BedDouble,
-  Bath,
-  Car,
-  Maximize2,
-  MapPin,
-  ChevronLeft,
-  Check,
-} from "lucide-react";
-import { getPropertyBySlug, getAllProperties } from "@/data/properties";
+import { BedDouble, Bath, Car, Maximize2, MapPin, ChevronLeft, Check } from "lucide-react";
+import { query, queryOne } from "@/lib/db";
+import { mapDBToProperty } from "@/lib/propertyMapper";
 import { PropertyGallery } from "@/components/properties/PropertyGallery";
 import { PropertyContactForm } from "@/components/properties/PropertyContactForm";
-import {
-  formatCurrency,
-  formatArea,
-} from "@/lib/utils";
-import {
-  propertyTypeLabels,
-  propertyTransactionLabels,
-  propertyStatusLabels,
-} from "@/types/property";
+import { formatCurrency, formatArea } from "@/lib/utils";
+import { propertyTypeLabels, propertyTransactionLabels } from "@/types/property";
 
-export async function generateStaticParams() {
-  const properties = getAllProperties();
-  return properties.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = "force-dynamic";
 
-export async function generateMetadata({
-  params,
-}: PageProps<"/imoveis/[slug]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/imoveis/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
+  const row = await queryOne<Record<string, unknown>>(
+    "SELECT title, property_type, transaction_type, neighborhood, city, area, bedrooms, price FROM properties WHERE slug=? LIMIT 1",
+    [slug]
+  );
+  if (!row) return { title: "Imóvel não encontrado" };
 
-  if (!property) {
-    return { title: "Imóvel não encontrado" };
-  }
+  const type  = (propertyTypeLabels as Record<string, string>)[String(row.property_type)] ?? String(row.property_type);
+  const trans = (propertyTransactionLabels as Record<string, string>)[String(row.transaction_type)] ?? String(row.transaction_type);
 
   return {
-    title: property.title,
-    description: `${propertyTypeLabels[property.type]} para ${propertyTransactionLabels[property.transaction]} em ${property.location.neighborhood}, ${property.location.city}. ${formatArea(property.area)}, ${property.bedrooms > 0 ? `${property.bedrooms} quartos` : ""}. ${formatCurrency(property.price)}.`,
-    openGraph: {
-      title: property.title,
-      images: [{ url: property.images[0] }],
-    },
+    title: String(row.title),
+    description: `${type} para ${trans} em ${row.neighborhood ?? ""}, ${row.city}. ${formatArea(Number(row.area))}${Number(row.bedrooms) > 0 ? `, ${row.bedrooms} quartos` : ""}. ${formatCurrency(Number(row.price))}.`,
   };
 }
 
-export default async function PropertyPage({
-  params,
-}: PageProps<"/imoveis/[slug]">) {
+export default async function PropertyPage({ params }: PageProps<"/imoveis/[slug]">) {
   const { slug } = await params;
-  const property = getPropertyBySlug(slug);
 
-  if (!property) {
-    notFound();
-  }
+  const row = await queryOne<Record<string, unknown>>(
+    `SELECT p.*, a.name AS agent_name, a.phone AS agent_phone, a.email AS agent_email
+     FROM properties p
+     LEFT JOIN agents a ON a.id = p.agent_id
+     WHERE p.slug=? AND p.status='disponivel'
+     LIMIT 1`,
+    [slug]
+  );
+
+  if (!row) notFound();
+
+  const [images, featureRows] = await Promise.all([
+    query<{ image_path: string }>(
+      "SELECT image_path FROM property_images WHERE property_id=? ORDER BY display_order ASC",
+      [Number(row.id)]
+    ),
+    query<{ name: string }>(
+      `SELECT f.name FROM features f
+       INNER JOIN property_features pf ON pf.feature_id=f.id
+       WHERE pf.property_id=?`,
+      [Number(row.id)]
+    ),
+  ]);
+
+  const property = mapDBToProperty(
+    row,
+    images.map((i) => i.image_path),
+    featureRows.map((f) => f.name)
+  );
 
   const isRental = property.transaction === "aluguel";
 
@@ -65,16 +68,9 @@ export default async function PropertyPage({
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-sm text-neutral-400">
-          <Link href="/" className="hover:text-neutral-900 transition-colors">
-            Início
-          </Link>
+          <Link href="/" className="hover:text-neutral-900 transition-colors">Início</Link>
           <span>/</span>
-          <Link
-            href="/imoveis"
-            className="hover:text-neutral-900 transition-colors"
-          >
-            Imóveis
-          </Link>
+          <Link href="/imoveis" className="hover:text-neutral-900 transition-colors">Imóveis</Link>
           <span>/</span>
           <span className="text-neutral-700 line-clamp-1">{property.title}</span>
         </nav>
@@ -90,7 +86,6 @@ export default async function PropertyPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Main info */}
           <div className="lg:col-span-2">
-            {/* Header */}
             <div className="mb-8">
               <div className="flex flex-wrap gap-2 mb-3">
                 <span className="text-xs font-semibold px-2.5 py-1 bg-neutral-900 text-white tracking-wide">
@@ -103,9 +98,7 @@ export default async function PropertyPage({
                   Cód: {property.code}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">
-                {property.title}
-              </h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-3">{property.title}</h1>
               <div className="flex items-center gap-1.5 text-neutral-500">
                 <MapPin size={16} />
                 <span>
@@ -122,14 +115,12 @@ export default async function PropertyPage({
               </p>
               <p className="text-3xl font-bold text-neutral-900">
                 {formatCurrency(property.price)}
-                {isRental && (
-                  <span className="text-lg font-normal text-neutral-500">/mês</span>
-                )}
+                {isRental && <span className="text-lg font-normal text-neutral-500">/mês</span>}
               </p>
-              {property.condoFee && (
+              {property.condoFee != null && property.condoFee > 0 && (
                 <p className="text-sm text-neutral-500 mt-2">
                   Condomínio: {formatCurrency(property.condoFee)}/mês
-                  {property.iptu && (
+                  {property.iptu != null && property.iptu > 0 && (
                     <span> • IPTU: {formatCurrency(property.iptu)}/ano</span>
                   )}
                 </p>
@@ -141,18 +132,14 @@ export default async function PropertyPage({
               {property.area > 0 && (
                 <div className="text-center p-4 border border-neutral-100">
                   <Maximize2 size={20} className="mx-auto text-neutral-400 mb-2" />
-                  <p className="text-lg font-bold text-neutral-900">
-                    {formatArea(property.area)}
-                  </p>
+                  <p className="text-lg font-bold text-neutral-900">{formatArea(property.area)}</p>
                   <p className="text-xs text-neutral-400 mt-0.5">Área total</p>
                 </div>
               )}
               {property.bedrooms > 0 && (
                 <div className="text-center p-4 border border-neutral-100">
                   <BedDouble size={20} className="mx-auto text-neutral-400 mb-2" />
-                  <p className="text-lg font-bold text-neutral-900">
-                    {property.bedrooms}
-                  </p>
+                  <p className="text-lg font-bold text-neutral-900">{property.bedrooms}</p>
                   <p className="text-xs text-neutral-400 mt-0.5">
                     {property.bedrooms === 1 ? "Quarto" : "Quartos"}
                     {property.suites > 0 && ` (${property.suites} suítes)`}
@@ -162,9 +149,7 @@ export default async function PropertyPage({
               {property.bathrooms > 0 && (
                 <div className="text-center p-4 border border-neutral-100">
                   <Bath size={20} className="mx-auto text-neutral-400 mb-2" />
-                  <p className="text-lg font-bold text-neutral-900">
-                    {property.bathrooms}
-                  </p>
+                  <p className="text-lg font-bold text-neutral-900">{property.bathrooms}</p>
                   <p className="text-xs text-neutral-400 mt-0.5">
                     {property.bathrooms === 1 ? "Banheiro" : "Banheiros"}
                   </p>
@@ -173,9 +158,7 @@ export default async function PropertyPage({
               {property.parkingSpaces > 0 && (
                 <div className="text-center p-4 border border-neutral-100">
                   <Car size={20} className="mx-auto text-neutral-400 mb-2" />
-                  <p className="text-lg font-bold text-neutral-900">
-                    {property.parkingSpaces}
-                  </p>
+                  <p className="text-lg font-bold text-neutral-900">{property.parkingSpaces}</p>
                   <p className="text-xs text-neutral-400 mt-0.5">
                     {property.parkingSpaces === 1 ? "Vaga" : "Vagas"}
                   </p>
@@ -184,21 +167,17 @@ export default async function PropertyPage({
             </div>
 
             {/* Description */}
-            <div className="mb-8">
-              <h2 className="text-lg font-bold text-neutral-900 mb-4">
-                Descrição
-              </h2>
-              <p className="text-neutral-600 leading-relaxed">
-                {property.description}
-              </p>
-            </div>
+            {property.description && (
+              <div className="mb-8">
+                <h2 className="text-lg font-bold text-neutral-900 mb-4">Descrição</h2>
+                <p className="text-neutral-600 leading-relaxed">{property.description}</p>
+              </div>
+            )}
 
             {/* Features */}
             {property.features.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-lg font-bold text-neutral-900 mb-4">
-                  Características
-                </h2>
+                <h2 className="text-lg font-bold text-neutral-900 mb-4">Características</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {property.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-2.5">
@@ -210,22 +189,16 @@ export default async function PropertyPage({
               </div>
             )}
 
-            {/* Location details */}
+            {/* Location */}
             <div className="border-t border-neutral-100 pt-8">
-              <h2 className="text-lg font-bold text-neutral-900 mb-4">
-                Localização
-              </h2>
+              <h2 className="text-lg font-bold text-neutral-900 mb-4">Localização</h2>
               <div className="bg-neutral-50 border border-neutral-100 p-5">
                 <p className="text-sm text-neutral-600">
                   <strong>{property.location.address}</strong>
                   <br />
-                  {property.location.neighborhood} — {property.location.city} /{" "}
-                  {property.location.state}
+                  {property.location.neighborhood} — {property.location.city} / {property.location.state}
                   {property.location.zipCode && (
-                    <>
-                      <br />
-                      CEP: {property.location.zipCode}
-                    </>
+                    <><br />CEP: {property.location.zipCode}</>
                   )}
                 </p>
               </div>
@@ -235,15 +208,11 @@ export default async function PropertyPage({
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <PropertyContactForm
-                propertyTitle={property.title}
-                propertyCode={property.code}
-              />
+              <PropertyContactForm propertyTitle={property.title} propertyCode={property.code} />
             </div>
           </div>
         </div>
 
-        {/* Back link */}
         <div className="mt-12 pt-8 border-t border-neutral-100">
           <Link
             href="/imoveis"
