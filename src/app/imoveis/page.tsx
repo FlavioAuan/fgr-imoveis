@@ -12,7 +12,9 @@ export const metadata: Metadata = {
     "Encontre casas, apartamentos, terrenos e imóveis comerciais para compra ou aluguel. Imóveis selecionados pela FGR Imóveis.",
 };
 
-export default async function ImoveisPage({ searchParams }: PageProps<"/imoveis">) {
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function ImoveisPage({ searchParams }: Props) {
   const raw = await searchParams;
 
   const conditions = ["p.status = 'disponivel'"];

@@ -11,7 +11,9 @@ import { propertyTypeLabels, propertyTransactionLabels } from "@/types/property"
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: PageProps<"/imoveis/[slug]">): Promise<Metadata> {
+type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const row = await queryOne<Record<string, unknown>>(
     "SELECT title, property_type, transaction_type, neighborhood, city, area, bedrooms, price FROM properties WHERE slug=? LIMIT 1",
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }: PageProps<"/imoveis/[slug]">)
   };
 }
 
-export default async function PropertyPage({ params }: PageProps<"/imoveis/[slug]">) {
+export default async function PropertyPage({ params }: Props) {
   const { slug } = await params;
 
   const row = await queryOne<Record<string, unknown>>(
