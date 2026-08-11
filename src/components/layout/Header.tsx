@@ -90,7 +90,7 @@ export function Header() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "lg:hidden fixed inset-0 top-16 bg-white/95 backdrop-blur-sm z-40 transition-all duration-300",
+          "lg:hidden fixed inset-0 top-16 bg-white z-40 transition-all duration-300",
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
