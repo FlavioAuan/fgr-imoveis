@@ -124,9 +124,10 @@ export function Footer() {
             <Image
               src="/images/auansistemas.png"
               alt="Auan Sistemas"
-              width={120}
-              height={32}
-              className="object-contain"
+              width={100}
+              height={100}
+              className="object-contain mix-blend-screen"
+              unoptimized
             />
           </a>
         </div>
