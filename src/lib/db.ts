@@ -20,8 +20,7 @@ export async function query<T = unknown>(
   sql: string,
   params?: QueryParam[]
 ): Promise<T[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [rows] = await pool.execute(sql, params as any);
+  const [rows] = await pool.execute(sql, params as never);
   return rows as T[];
 }
 
