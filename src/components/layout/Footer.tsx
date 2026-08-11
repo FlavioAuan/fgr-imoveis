@@ -124,8 +124,8 @@ export function Footer() {
             <Image
               src="/images/auansistemas.png"
               alt="Auan Sistemas"
-              width={100}
-              height={100}
+              width={60}
+              height={60}
               className="object-contain mix-blend-screen"
               unoptimized
             />
