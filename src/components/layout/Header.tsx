@@ -75,16 +75,7 @@ export function Header() {
           </div>
 
           {/* Mobile controls */}
-          <div className="flex lg:hidden items-center gap-3">
-            <a
-              href={getWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="flex items-center justify-center w-9 h-9 bg-[#25D366] text-white rounded-full"
-            >
-              <MessageCircle size={18} />
-            </a>
+          <div className="flex lg:hidden items-center">
             <button
               onClick={() => setMobileOpen((v) => !v)}
               aria-label="Menu"
@@ -99,7 +90,7 @@ export function Header() {
       {/* Mobile menu */}
       <div
         className={cn(
-          "lg:hidden fixed inset-0 top-16 bg-white z-40 transition-all duration-300",
+          "lg:hidden fixed inset-0 top-16 bg-white/95 backdrop-blur-sm z-40 transition-all duration-300",
           mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
@@ -109,7 +100,7 @@ export function Header() {
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className="text-lg text-neutral-900 font-medium py-4 border-b border-neutral-100 hover:text-neutral-600 transition-colors"
+              className="text-sm text-neutral-600 font-medium py-4 border-b border-neutral-100 hover:text-neutral-900 tracking-wide transition-colors"
             >
               {link.label}
             </Link>
