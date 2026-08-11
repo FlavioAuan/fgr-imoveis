@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { query } from "@/lib/db";
-import sharp from "sharp";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
@@ -23,14 +22,11 @@ export async function POST(req: NextRequest) {
 
     for (const file of files) {
       const buffer = Buffer.from(await file.arrayBuffer());
-      const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
       const dest = path.join(uploadDir, name);
 
-      // Compress + convert to WebP
-      await sharp(buffer)
-        .resize(1280, 960, { fit: "inside", withoutEnlargement: true })
-        .webp({ quality: 82 })
-        .toFile(dest);
+      await writeFile(dest, buffer);
 
       const relativePath = `/uploads/properties/${name}`;
       saved.push(relativePath);
