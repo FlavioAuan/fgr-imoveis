@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MessageCircle, MapPin, Phone, Mail } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/InstagramIcon";
 import { Logo } from "@/components/ui/Logo";
@@ -113,9 +114,21 @@ export function Footer() {
             © {new Date().getFullYear()} FGR Imóveis. Todos os direitos
             reservados.
           </p>
-          <p className="text-xs text-neutral-600">
-            Desenvolvido com excelência
-          </p>
+          <a
+            href="https://auansistemas.com.br"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center gap-2 opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <span className="text-xs text-neutral-500">Desenvolvido por Auan Sistemas - Inteligentes.</span>
+            <Image
+              src="/images/auansistemas.png"
+              alt="Auan Sistemas"
+              width={120}
+              height={32}
+              className="object-contain"
+            />
+          </a>
         </div>
       </div>
     </footer>
