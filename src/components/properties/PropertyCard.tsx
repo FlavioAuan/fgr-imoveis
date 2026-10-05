@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BedDouble, Bath, Car, Maximize2, MapPin } from "lucide-react";
+import { ArrowRight, BedDouble, Bath, Car, Maximize2, MapPin } from "lucide-react";
 import { Property, propertyTypeLabels } from "@/types/property";
 import { formatCurrency, formatArea } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -17,12 +17,12 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
     <Link
       href={`/imoveis/${property.slug}`}
       className={cn(
-        "group block bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1",
+        "group block overflow-hidden rounded-3xl border border-neutral-200/80 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.35)]",
         className
       )}
     >
       {/* Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
+      <div className="relative m-2 aspect-[4/3] overflow-hidden rounded-[18px] bg-neutral-100">
         <Image
           src={property.images[0]}
           alt={property.title}
@@ -33,33 +33,33 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
         <div className="absolute top-3 left-3 flex gap-2">
           <span
             className={cn(
-              "text-xs font-semibold px-2.5 py-1 tracking-wide",
+              "rounded-full px-2.5 py-1 font-mono text-[10px] font-medium tracking-[0.15em] backdrop-blur-md",
               isRental
-                ? "bg-neutral-700 text-white"
-                : "bg-neutral-900 text-white"
+                ? "bg-neutral-700/80 text-white"
+                : "bg-neutral-950/80 text-white"
             )}
           >
             {isRental ? "ALUGUEL" : "VENDA"}
           </span>
           {property.featured && (
-            <span className="text-xs font-semibold px-2.5 py-1 bg-white text-neutral-900 tracking-wide">
+            <span className="rounded-full px-2.5 py-1 bg-white/90 font-mono text-[10px] font-medium tracking-[0.15em] text-neutral-900 backdrop-blur-md">
               DESTAQUE
             </span>
           )}
         </div>
         <div className="absolute top-3 right-3">
-          <span className="text-xs text-neutral-300 bg-neutral-900/60 backdrop-blur-sm px-2 py-1">
+          <span className="rounded-full px-2.5 py-1 font-mono text-[10px] text-neutral-200 bg-neutral-950/50 backdrop-blur-md">
             {property.code}
           </span>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-5 border border-t-0 border-neutral-100">
-        <p className="text-xs text-neutral-400 font-medium tracking-widest uppercase mb-2">
+      <div className="px-5 pb-5 pt-3">
+        <p className="font-mono text-[10px] text-neutral-400 font-medium tracking-[0.2em] uppercase mb-2">
           {propertyTypeLabels[property.type]}
         </p>
-        <h3 className="text-neutral-900 font-semibold text-base leading-snug mb-3 line-clamp-2 group-hover:text-neutral-600 transition-colors">
+        <h3 className="text-neutral-900 font-semibold text-lg leading-snug mb-3 line-clamp-2 group-hover:text-neutral-600 transition-colors">
           {property.title}
         </h3>
 
@@ -72,28 +72,28 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
 
         {/* Specs */}
         {(property.bedrooms > 0 || property.area > 0) && (
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-neutral-500 mb-4 border-t border-neutral-50 pt-4">
+          <div className="flex flex-wrap gap-2 text-xs text-neutral-600 mb-5">
             {property.bedrooms > 0 && (
-              <span className="flex items-center gap-1.5">
-                <BedDouble size={15} />
+              <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1">
+                <BedDouble size={13} />
                 {property.bedrooms} {property.bedrooms === 1 ? "quarto" : "quartos"}
               </span>
             )}
             {property.bathrooms > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Bath size={15} />
+              <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1">
+                <Bath size={13} />
                 {property.bathrooms} {property.bathrooms === 1 ? "banheiro" : "banheiros"}
               </span>
             )}
             {property.parkingSpaces > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Car size={15} />
+              <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1">
+                <Car size={13} />
                 {property.parkingSpaces} {property.parkingSpaces === 1 ? "vaga" : "vagas"}
               </span>
             )}
             {property.area > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Maximize2 size={15} />
+              <span className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1">
+                <Maximize2 size={13} />
                 {formatArea(property.area)}
               </span>
             )}
@@ -103,16 +103,19 @@ export function PropertyCard({ property, className }: PropertyCardProps) {
         {/* Price */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-xs text-neutral-400 mb-0.5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-400 mb-1">
               {isRental ? "Aluguel mensal" : "Preço de venda"}
             </p>
-            <p className="text-lg font-bold text-neutral-900">
+            <p className="font-display text-xl font-bold tracking-tight text-neutral-900">
               {formatCurrency(property.price)}
               {isRental && <span className="text-sm font-normal text-neutral-500">/mês</span>}
             </p>
           </div>
-          <span className="text-xs font-medium text-neutral-900 border-b border-neutral-900 pb-0.5 group-hover:border-neutral-400 group-hover:text-neutral-400 transition-colors">
-            Ver imóvel
+          <span
+            aria-label="Ver imóvel"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-950 text-white transition-transform duration-300 group-hover:-rotate-45"
+          >
+            <ArrowRight size={16} />
           </span>
         </div>
       </div>

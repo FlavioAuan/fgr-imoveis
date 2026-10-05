@@ -26,9 +26,12 @@ const bedroomsOptions = [
 
 const cities = [
   { value: "", label: "Todas as cidades" },
-  { value: "São Paulo", label: "São Paulo" },
-  { value: "Barueri", label: "Barueri" },
-  { value: "Cotia", label: "Cotia" },
+  { value: "São João da Boa Vista", label: "São João da Boa Vista" },
+  { value: "Águas da Prata", label: "Águas da Prata" },
+  { value: "Vargem Grande do Sul", label: "Vargem Grande do Sul" },
+  { value: "Espírito Santo do Pinhal", label: "Espírito Santo do Pinhal" },
+  { value: "Aguaí", label: "Aguaí" },
+  { value: "Santo Antônio do Jardim", label: "Santo Antônio do Jardim" },
 ];
 
 const sortOptions = [

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Shield, Users, Award, Handshake } from "lucide-react";
+import { Shield, Users, Award, Handshake, ArrowRight } from "lucide-react";
 
 const values = [
   {
@@ -30,12 +30,12 @@ const values = [
 
 export function TrustSection() {
   return (
-    <section className="py-20 lg:py-28 bg-neutral-50">
+    <section className="py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Image */}
           <div className="relative">
-            <div className="aspect-[4/5] relative overflow-hidden">
+            <div className="aspect-[4/5] relative overflow-hidden rounded-[32px]">
               <div
                 className="w-full h-full bg-cover bg-center"
                 style={{
@@ -46,22 +46,20 @@ export function TrustSection() {
                 aria-label="Consultoria imobiliária profissional"
               />
             </div>
-            <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-neutral-900 hidden lg:flex items-center justify-center text-center p-4">
+            <div className="absolute -bottom-6 -right-6 w-40 h-40 rounded-[28px] bg-neutral-950 grid-lines hidden lg:flex items-center justify-center text-center p-4 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)]">
               <div>
-                <p className="text-white text-2xl font-bold">FGR</p>
-                <p className="text-neutral-400 text-xs tracking-widest mt-1">IMÓVEIS</p>
+                <p className="font-display text-white text-3xl font-bold tracking-tight">FGR</p>
+                <p className="font-mono text-neutral-400 text-[10px] tracking-[0.3em] mt-1">IMÓVEIS</p>
               </div>
             </div>
           </div>
 
           {/* Content */}
           <div>
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-4">
-              Quem somos
-            </p>
-            <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-6">
+            <p className="eyebrow mb-4">Quem somos</p>
+            <h2 className="text-3xl lg:text-5xl font-bold text-neutral-900 leading-tight mb-6">
               Mais do que imóveis.{" "}
-              <span className="italic font-normal">Novos começos.</span>
+              <span className="font-normal text-neutral-400">Novos começos.</span>
             </h2>
             <p className="text-neutral-600 leading-relaxed mb-6">
               A FGR Imóveis nasce da convicção de que encontrar o imóvel certo
@@ -78,9 +76,9 @@ export function TrustSection() {
             {/* Values grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
               {values.map((item) => (
-                <div key={item.title} className="flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 border border-neutral-200 flex items-center justify-center">
-                    <item.icon size={18} className="text-neutral-700" />
+                <div key={item.title} className="flex gap-4 rounded-2xl border border-neutral-200/80 bg-neutral-50 p-4 transition-colors hover:border-neutral-300 hover:bg-white">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-neutral-950 flex items-center justify-center">
+                    <item.icon size={18} className="text-white" />
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold text-neutral-900 mb-1">
@@ -96,9 +94,10 @@ export function TrustSection() {
 
             <Link
               href="/sobre"
-              className="inline-flex items-center gap-2 bg-neutral-900 text-white font-medium px-8 py-4 text-sm hover:bg-neutral-700 transition-colors"
+              className="btn btn-dark"
             >
               Conheça a FGR Imóveis
+              <span className="btn-icon"><ArrowRight size={14} /></span>
             </Link>
           </div>
         </div>

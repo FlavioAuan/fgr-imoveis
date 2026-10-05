@@ -17,14 +17,12 @@ export async function FeaturedProperties() {
   const featured = rows.map((row) => mapDBToProperty(row));
 
   return (
-    <section className="py-20 lg:py-28 bg-white">
+    <section className="relative py-20 lg:py-28 bg-neutral-50 grid-lines-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
           <div>
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-3">
-              Selecionados para você
-            </p>
-            <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900">
+            <p className="eyebrow mb-4">Selecionados para você</p>
+            <h2 className="text-3xl lg:text-5xl font-bold text-neutral-900">
               Imóveis em destaque
             </h2>
             <p className="text-neutral-500 mt-3 max-w-md">
@@ -33,7 +31,7 @@ export async function FeaturedProperties() {
           </div>
           <Link
             href="/imoveis"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-900 border-b border-neutral-900 pb-0.5 hover:text-neutral-500 hover:border-neutral-500 transition-colors whitespace-nowrap self-start sm:self-auto"
+            className="btn btn-outline hidden sm:inline-flex whitespace-nowrap"
           >
             Ver todos os imóveis
             <ArrowRight size={16} />
@@ -53,7 +51,7 @@ export async function FeaturedProperties() {
         <div className="mt-10 text-center sm:hidden">
           <Link
             href="/imoveis"
-            className="inline-flex items-center gap-2 bg-neutral-900 text-white font-medium px-8 py-4 text-sm hover:bg-neutral-700 transition-colors"
+            className="btn btn-dark"
           >
             Ver todos os imóveis
             <ArrowRight size={16} />

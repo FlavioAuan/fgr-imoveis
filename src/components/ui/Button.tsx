@@ -14,13 +14,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+          "inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-wide transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
           {
-            "bg-neutral-900 text-white hover:bg-neutral-700 focus-visible:ring-neutral-900":
+            "bg-neutral-950 text-white shadow-[0_8px_30px_-10px_rgba(0,0,0,0.6)] hover:-translate-y-0.5 hover:bg-neutral-800 focus-visible:ring-neutral-900":
               variant === "primary",
             "bg-white text-neutral-900 hover:bg-neutral-100 focus-visible:ring-neutral-900":
               variant === "secondary",
-            "border border-neutral-900 text-neutral-900 bg-transparent hover:bg-neutral-900 hover:text-white focus-visible:ring-neutral-900":
+            "border border-neutral-300 text-neutral-900 bg-transparent hover:border-neutral-950 hover:bg-neutral-900 hover:text-white focus-visible:ring-neutral-900":
               variant === "outline",
             "text-neutral-700 bg-transparent hover:bg-neutral-100 focus-visible:ring-neutral-900":
               variant === "ghost",
@@ -28,9 +28,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
               variant === "whatsapp",
           },
           {
-            "text-sm px-4 py-2": size === "sm",
-            "text-base px-6 py-3": size === "md",
-            "text-base px-8 py-4": size === "lg",
+            "text-sm px-5 py-2": size === "sm",
+            "text-sm px-7 py-3.5": size === "md",
+            "text-base px-9 py-4": size === "lg",
           },
           className
         )}

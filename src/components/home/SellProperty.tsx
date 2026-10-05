@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
@@ -44,13 +44,13 @@ export function SellProperty() {
   return (
     <>
       {/* Section */}
-      <section className="py-20 lg:py-28 bg-neutral-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-20 lg:py-28 bg-neutral-950 text-white">
+        <div className="absolute inset-0 grid-lines [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+        <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-[120px]" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-4">
-              Para proprietários
-            </p>
-            <h2 className="text-3xl lg:text-4xl font-bold mb-5">
+            <p className="eyebrow mb-4">Para proprietários</p>
+            <h2 className="text-3xl lg:text-5xl font-bold mb-5">
               Quer vender seu imóvel?
             </h2>
             <p className="text-neutral-300 leading-relaxed mb-10">
@@ -60,9 +60,10 @@ export function SellProperty() {
             </p>
             <button
               onClick={() => setModalOpen(true)}
-              className="inline-flex items-center justify-center bg-white text-neutral-900 font-semibold px-10 py-4 hover:bg-neutral-100 transition-colors text-sm tracking-wide"
+              className="btn btn-light px-9 py-4"
             >
               Quero vender meu imóvel
+              <span className="btn-icon bg-neutral-950/10"><ArrowRight size={14} /></span>
             </button>
           </div>
         </div>
@@ -80,7 +81,7 @@ export function SellProperty() {
             className="absolute inset-0 bg-neutral-950/70 backdrop-blur-sm"
             onClick={() => !submitted && setModalOpen(false)}
           />
-          <div className="relative z-10 bg-white w-full sm:max-w-lg sm:rounded-none max-h-[90vh] overflow-y-auto">
+          <div className="relative z-10 bg-white w-full rounded-t-3xl sm:max-w-lg sm:rounded-3xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-neutral-100">
               <h3 className="text-lg font-bold text-neutral-900">
                 Quero vender meu imóvel
@@ -175,7 +176,7 @@ export function SellProperty() {
                   />
                   <button
                     type="submit"
-                    className="w-full bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-700 transition-colors text-sm mt-2"
+                    className="btn btn-dark w-full py-4 mt-2"
                   >
                     Enviar solicitação
                   </button>

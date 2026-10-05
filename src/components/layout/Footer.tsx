@@ -15,7 +15,7 @@ const quickLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-neutral-950 text-white">
+    <footer className="bg-neutral-950 text-white border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
@@ -32,7 +32,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                className="flex items-center justify-center w-10 h-10 border border-neutral-700 hover:border-white hover:text-white text-neutral-400 transition-colors"
+                className="flex items-center justify-center w-10 h-10 rounded-full border border-neutral-800 bg-white/5 hover:border-white hover:bg-white hover:text-neutral-950 text-neutral-400 transition-all"
               >
                 <MessageCircle size={18} />
               </a>
@@ -41,7 +41,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                className="flex items-center justify-center w-10 h-10 border border-neutral-700 hover:border-white hover:text-white text-neutral-400 transition-colors"
+                className="flex items-center justify-center w-10 h-10 rounded-full border border-neutral-800 bg-white/5 hover:border-white hover:bg-white hover:text-neutral-950 text-neutral-400 transition-all"
               >
                 <InstagramIcon width={18} height={18} />
               </a>
@@ -50,7 +50,7 @@ export function Footer() {
 
           {/* Quick links */}
           <div>
-            <h3 className="text-sm font-semibold tracking-widest uppercase text-neutral-300 mb-6">
+            <h3 className="font-mono text-[11px] font-medium tracking-[0.25em] uppercase text-neutral-500 mb-6">
               Links rápidos
             </h3>
             <ul className="space-y-3">
@@ -69,7 +69,7 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-sm font-semibold tracking-widest uppercase text-neutral-300 mb-6">
+            <h3 className="font-mono text-[11px] font-medium tracking-[0.25em] uppercase text-neutral-500 mb-6">
               Contato
             </h3>
             <ul className="space-y-4">

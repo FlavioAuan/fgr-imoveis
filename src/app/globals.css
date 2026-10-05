@@ -19,6 +19,69 @@ html {
   scroll-behavior: smooth;
 }
 
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), var(--font-geist-sans), sans-serif;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer components {
+  /* Rótulo técnico acima dos títulos */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.25em] text-neutral-400;
+  }
+  .eyebrow::before {
+    content: "";
+    @apply block h-1.5 w-1.5 rounded-full bg-current;
+  }
+
+  /* Botões em pílula */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-medium tracking-wide transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-dark {
+    @apply bg-neutral-950 text-white shadow-[0_8px_30px_-10px_rgba(0,0,0,0.6)] hover:-translate-y-0.5 hover:bg-neutral-800 hover:shadow-[0_14px_40px_-12px_rgba(0,0,0,0.7)] focus-visible:ring-neutral-900;
+  }
+  .btn-light {
+    @apply bg-white text-neutral-950 shadow-[0_8px_30px_-10px_rgba(255,255,255,0.35)] hover:-translate-y-0.5 hover:bg-neutral-100 focus-visible:ring-white;
+  }
+  .btn-glass {
+    @apply border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 focus-visible:ring-white;
+  }
+  .btn-outline {
+    @apply border border-neutral-300 text-neutral-900 hover:border-neutral-950 hover:bg-neutral-950 hover:text-white focus-visible:ring-neutral-900;
+  }
+  /* Ícone de seta em círculo dentro do botão */
+  .btn-icon {
+    @apply -mr-3 flex h-7 w-7 items-center justify-center rounded-full bg-white/15 transition-transform duration-300;
+  }
+  .btn:hover .btn-icon {
+    @apply translate-x-0.5 -rotate-45;
+  }
+
+  /* Painel de vidro */
+  .glass {
+    @apply border border-white/15 bg-white/10 backdrop-blur-xl;
+  }
+
+  /* Grade técnica de fundo */
+  .grid-lines {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+  .grid-lines-dark {
+    background-image:
+      linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+}
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
