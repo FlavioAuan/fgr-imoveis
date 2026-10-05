@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getWhatsAppUrl } from "@/lib/config";
+import { useWhatsAppUrl } from "@/components/providers/SiteContactProvider";
 import { saveLead } from "@/lib/leads";
 
 function WhatsAppIcon({ size = 28 }: { size?: number }) {
@@ -25,6 +25,7 @@ const inputClass =
   "w-full border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400 transition-colors rounded-none";
 
 export function WhatsAppButton() {
+  const getWhatsAppUrl = useWhatsAppUrl();
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);

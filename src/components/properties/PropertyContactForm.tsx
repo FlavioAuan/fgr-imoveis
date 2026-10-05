@@ -4,7 +4,8 @@ import { useState } from "react";
 import { CheckCircle2, MessageCircle, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { getWhatsAppUrl, siteConfig } from "@/lib/config";
+import { siteConfig } from "@/lib/config";
+import { useWhatsAppUrl } from "@/components/providers/SiteContactProvider";
 import { saveLead } from "@/lib/leads";
 
 interface PropertyContactFormProps {
@@ -22,6 +23,7 @@ export function PropertyContactForm({
   propertyId,
   propertySlug,
 }: PropertyContactFormProps) {
+  const getWhatsAppUrl = useWhatsAppUrl();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({

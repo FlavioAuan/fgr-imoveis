@@ -11,9 +11,9 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <Categories />
       <FeaturedProperties />
       <TrustSection />
-      <Categories />
       <SellProperty />
       <WhatsAppCTA />
     </>

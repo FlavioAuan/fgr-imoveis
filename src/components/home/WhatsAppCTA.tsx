@@ -1,35 +1,32 @@
 import { MessageCircle } from "lucide-react";
 import { getWhatsAppUrl } from "@/lib/config";
+import { getSiteContact } from "@/lib/siteSettings";
 
-export function WhatsAppCTA() {
+export async function WhatsAppCTA() {
+  const { whatsapp } = await getSiteContact();
   return (
-    <section className="py-20 lg:py-28 bg-white border-t border-neutral-100">
+    <section className="py-20 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-[32px] bg-neutral-950 grid-lines px-8 py-16 text-center lg:py-20">
-          {/* Decorative */}
-          <div className="absolute -top-20 -left-20 w-64 h-64 border border-white/10 rounded-full" />
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 border border-white/10 rounded-full" />
-          <div className="absolute -bottom-32 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-[#25D366]/20 blur-[100px]" />
-
-          <div className="relative z-10 max-w-xl mx-auto">
-            <p className="eyebrow mb-4">Atendimento personalizado</p>
-            <h2 className="text-3xl lg:text-5xl font-bold text-white mb-5">
-              Está procurando um imóvel?
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 rounded-[28px] bg-neutral-900 px-8 py-12 sm:px-12 lg:py-14">
+          <div className="max-w-xl">
+            <p className="eyebrow-dark mb-4">Fale com a gente</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Não achou o que procurava?
             </h2>
-            <p className="text-neutral-300 leading-relaxed mb-10">
-              Fale com a FGR Imóveis e encontre oportunidades que combinam com
-              você. Atendimento humano, dedicado e sem burocracia.
+            <p className="text-neutral-300 leading-relaxed">
+              Conte pelo WhatsApp o que você precisa. A gente procura junto
+              com você e avisa assim que surgir o imóvel certo.
             </p>
-            <a
-              href={getWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn px-9 py-4 bg-[#25D366] text-white shadow-[0_10px_40px_-10px_rgba(37,211,102,0.7)] hover:-translate-y-0.5 hover:bg-[#20bd5a] focus-visible:ring-[#25D366]"
-            >
-              <MessageCircle size={20} />
-              Falar pelo WhatsApp
-            </a>
           </div>
+          <a
+            href={getWhatsAppUrl(undefined, whatsapp)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn shrink-0 self-start lg:self-auto px-8 py-4 bg-[#25D366] text-white hover:bg-[#20bd5a] focus-visible:ring-[#25D366]"
+          >
+            <MessageCircle size={20} />
+            Chamar no WhatsApp
+          </a>
         </div>
       </div>
     </section>

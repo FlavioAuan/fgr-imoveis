@@ -17,6 +17,12 @@ const propertyTypeOptions = [
   { value: "outro", label: "Outro" },
 ];
 
+const sellBenefits = [
+  "Avaliação gratuita e sem compromisso",
+  "Fotos e divulgação nos principais portais",
+  "Acompanhamento até a assinatura da escritura",
+];
+
 export function SellProperty() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -44,27 +50,44 @@ export function SellProperty() {
   return (
     <>
       {/* Section */}
-      <section className="relative overflow-hidden py-20 lg:py-28 bg-neutral-950 text-white">
-        <div className="absolute inset-0 grid-lines [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
-        <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-[120px]" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="eyebrow mb-4">Para proprietários</p>
-            <h2 className="text-3xl lg:text-5xl font-bold mb-5">
-              Quer vender seu imóvel?
-            </h2>
-            <p className="text-neutral-300 leading-relaxed mb-10">
-              Conte com a FGR Imóveis para apresentar seu imóvel às pessoas
-              certas. Nossa equipe de especialistas irá avaliar, divulgar e
-              negociar com profissionalismo e dedicação.
-            </p>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="btn btn-light px-9 py-4"
-            >
-              Quero vender meu imóvel
-              <span className="btn-icon bg-neutral-950/10"><ArrowRight size={14} /></span>
-            </button>
+      <section className="py-20 lg:py-24 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 overflow-hidden rounded-[28px] bg-white ring-1 ring-neutral-200/70">
+            <div className="p-8 sm:p-12 lg:p-14 flex flex-col justify-center">
+              <p className="eyebrow mb-4 self-start">Para proprietários</p>
+              <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-5">
+                Vamos encontrar o comprador certo para o seu imóvel
+              </h2>
+              <p className="text-neutral-600 leading-relaxed mb-8">
+                Avaliamos seu imóvel com base no mercado local, cuidamos das
+                fotos e da divulgação e levamos até você quem realmente está
+                procurando. Você acompanha tudo de perto.
+              </p>
+              <ul className="space-y-3 mb-10">
+                {sellBenefits.map((item) => (
+                  <li key={item} className="flex items-center gap-3 text-sm font-medium text-neutral-800">
+                    <CheckCircle2 size={18} className="text-neutral-900 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => setModalOpen(true)}
+                className="btn btn-dark self-start px-8 py-4"
+              >
+                Quero anunciar meu imóvel
+                <ArrowRight size={16} />
+              </button>
+            </div>
+            <div
+              className="min-h-[280px] lg:min-h-full bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1000&q=80')",
+              }}
+              role="img"
+              aria-label="Casa com jardim e varanda"
+            />
           </div>
         </div>
       </section>
@@ -75,7 +98,7 @@ export function SellProperty() {
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Formulário para venda de imóvel"
+          aria-label="Formulário para anunciar imóvel"
         >
           <div
             className="absolute inset-0 bg-neutral-950/70 backdrop-blur-sm"
@@ -84,7 +107,7 @@ export function SellProperty() {
           <div className="relative z-10 bg-white w-full rounded-t-3xl sm:max-w-lg sm:rounded-3xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-neutral-100">
               <h3 className="text-lg font-bold text-neutral-900">
-                Quero vender meu imóvel
+                Quero anunciar meu imóvel
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
@@ -100,10 +123,10 @@ export function SellProperty() {
                 <div className="text-center py-8">
                   <CheckCircle2 size={48} className="text-neutral-900 mx-auto mb-4" />
                   <h4 className="text-xl font-bold text-neutral-900 mb-2">
-                    Recebemos seu contato!
+                    Recebemos seus dados!
                   </h4>
                   <p className="text-neutral-500 text-sm">
-                    Em breve nossa equipe entrará em contato com você.
+                    Nossa equipe vai entrar em contato em breve para conversar sobre o seu imóvel.
                   </p>
                   <button
                     onClick={() => {
@@ -133,7 +156,7 @@ export function SellProperty() {
                     type="tel"
                     value={form.whatsapp}
                     onChange={handleChange}
-                    placeholder="(11) 99999-9999"
+                    placeholder="(19) 99999-9999"
                     required
                   />
                   <Input
@@ -171,14 +194,14 @@ export function SellProperty() {
                     id="sell-message"
                     value={form.message}
                     onChange={handleChange}
-                    placeholder="Informações adicionais sobre seu imóvel"
+                    placeholder="Conte um pouco sobre o imóvel: bairro, tamanho, diferenciais..."
                     rows={3}
                   />
                   <button
                     type="submit"
                     className="btn btn-dark w-full py-4 mt-2"
                   >
-                    Enviar solicitação
+                    Enviar meus dados
                   </button>
                 </form>
               )}

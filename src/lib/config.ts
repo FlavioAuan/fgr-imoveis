@@ -40,9 +40,17 @@ export const siteConfig = {
 
 export const WHATSAPP_NUMBER = siteConfig.whatsapp;
 
-export function getWhatsAppUrl(message?: string): string {
+/** Deixa só os dígitos e garante o código do país (55) para números brasileiros. */
+export function normalizeWhatsApp(raw: string | null | undefined): string {
+  const digits = String(raw ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.length === 10 || digits.length === 11) return `55${digits}`;
+  return digits;
+}
+
+export function getWhatsAppUrl(message?: string, number: string = WHATSAPP_NUMBER): string {
   const text = encodeURIComponent(message ?? siteConfig.whatsappDefaultMessage);
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+  return `https://wa.me/${normalizeWhatsApp(number) || WHATSAPP_NUMBER}?text=${text}`;
 }
 
 export function getPropertyWhatsAppUrl(
@@ -51,4 +59,12 @@ export function getPropertyWhatsAppUrl(
 ): string {
   const message = `Olá! Gostaria de obter mais informações sobre o imóvel: ${propertyTitle} (Código: ${propertyCode}).`;
   return getWhatsAppUrl(message);
+}
+
+/** Formata um número de WhatsApp (ex.: 5519999999999 → (19) 99999-9999). */
+export function formatWhatsApp(number: string): string {
+  const d = normalizeWhatsApp(number).replace(/^55/, "");
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return number;
 }

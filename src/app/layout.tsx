@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
 import type React from "react";
-import { Geist, Geist_Mono, Space_Grotesk } from "next/font/google";
+import { Geist, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { siteConfig } from "@/lib/config";
+import { connection } from "next/server";
+import { getSiteContact } from "@/lib/siteSettings";
+import { SiteContactProvider } from "@/components/providers/SiteContactProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
+const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-display",
   subsets: ["latin"],
 });
@@ -34,7 +32,7 @@ export const metadata: Metadata = {
     "alugar imóvel",
     "casa",
     "apartamento",
-    "São Paulo",
+    "São João da Boa Vista",
     "alto padrão",
     "imobiliária",
   ],
@@ -63,11 +61,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Lê as configurações a cada requisição, para refletir alterações feitas no admin
+  await connection();
+  const contact = await getSiteContact();
+
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} antialiased`}>
+    <html lang="pt-BR" className={`${geistSans.variable} ${plusJakarta.variable} antialiased`}>
       <body className="min-h-screen flex flex-col">
-        <PublicShell>{children}</PublicShell>
+        <SiteContactProvider contact={contact}>
+          <PublicShell>{children}</PublicShell>
+        </SiteContactProvider>
       </body>
     </html>
   );

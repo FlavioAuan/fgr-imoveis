@@ -10,47 +10,10 @@ import {
   CheckCircle2,
   AtSign,
 } from "lucide-react";
-import { siteConfig, getWhatsAppUrl } from "@/lib/config";
+import { siteConfig, formatWhatsApp } from "@/lib/config";
+import { useSiteContact, useWhatsAppUrl } from "@/components/providers/SiteContactProvider";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-
-const contactItems = [
-  {
-    icon: Phone,
-    label: "Telefone",
-    value: siteConfig.phone,
-    href: `tel:${siteConfig.phone.replace(/\D/g, "")}`,
-    external: false,
-  },
-  {
-    icon: MessageCircle,
-    label: "WhatsApp",
-    value: siteConfig.phone,
-    href: getWhatsAppUrl(),
-    external: true,
-  },
-  {
-    icon: Mail,
-    label: "E-mail",
-    value: siteConfig.email,
-    href: `mailto:${siteConfig.email}`,
-    external: false,
-  },
-  {
-    icon: AtSign,
-    label: "Instagram",
-    value: siteConfig.instagram,
-    href: siteConfig.instagramUrl,
-    external: true,
-  },
-  {
-    icon: MapPin,
-    label: "Endereço",
-    value: `${siteConfig.address.street}, ${siteConfig.address.city} — ${siteConfig.address.state}`,
-    href: null,
-    external: false,
-  },
-];
 
 const hours = [
   siteConfig.businessHours.weekdays,
@@ -59,6 +22,46 @@ const hours = [
 ];
 
 export default function ContatoPage() {
+  const contact = useSiteContact();
+  const getWhatsAppUrl = useWhatsAppUrl();
+  const contactItems = [
+    {
+      icon: Phone,
+      label: "Telefone",
+      value: contact.phone,
+      href: `tel:${contact.phone.replace(/\D/g, "")}`,
+      external: false,
+    },
+    {
+      icon: MessageCircle,
+      label: "WhatsApp",
+      value: formatWhatsApp(contact.whatsapp),
+      href: getWhatsAppUrl(),
+      external: true,
+    },
+    {
+      icon: Mail,
+      label: "E-mail",
+      value: contact.email,
+      href: `mailto:${contact.email}`,
+      external: false,
+    },
+    {
+      icon: AtSign,
+      label: "Instagram",
+      value: contact.instagram,
+      href: contact.instagramUrl,
+      external: true,
+    },
+    {
+      icon: MapPin,
+      label: "Endereço",
+      value: `${contact.address.street}, ${contact.address.city} — ${contact.address.state}`,
+      href: null,
+      external: false,
+    },
+  ];
+
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: "",

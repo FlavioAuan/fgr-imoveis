@@ -17,16 +17,16 @@ export async function FeaturedProperties() {
   const featured = rows.map((row) => mapDBToProperty(row));
 
   return (
-    <section className="relative py-20 lg:py-28 bg-neutral-50 grid-lines-dark">
+    <section className="py-20 lg:py-24 bg-neutral-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
           <div>
-            <p className="eyebrow mb-4">Selecionados para você</p>
-            <h2 className="text-3xl lg:text-5xl font-bold text-neutral-900">
+            <p className="eyebrow bg-white mb-4">Escolhidos a dedo</p>
+            <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900">
               Imóveis em destaque
             </h2>
             <p className="text-neutral-500 mt-3 max-w-md">
-              Confira algumas das melhores oportunidades selecionadas pela FGR Imóveis.
+              Uma seleção dos imóveis que mais chamaram a nossa atenção. Visitamos cada um deles antes de indicar para você.
             </p>
           </div>
           <Link
@@ -39,7 +39,7 @@ export async function FeaturedProperties() {
         </div>
 
         {featured.length === 0 ? (
-          <p className="text-neutral-400 text-sm">Nenhum imóvel em destaque no momento.</p>
+          <p className="text-neutral-400 text-sm">Em breve, novos imóveis em destaque por aqui.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {featured.map((property) => (
