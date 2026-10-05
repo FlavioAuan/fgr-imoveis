@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X, ChevronLeft, ChevronRight, Search, Loader2 } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Search, Loader2, Trash2 } from "lucide-react";
 
 interface Lead {
   id: number;
@@ -58,6 +58,17 @@ export default function LeadsPage() {
   const [panelStatus, setPanelStatus] = useState("");
   const [savingPanel, setSavingPanel] = useState(false);
   const [panelSuccess, setPanelSuccess] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [canDelete, setCanDelete] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => setCanDelete(data?.role === "super_admin" || data?.role === "admin"))
+      .catch(() => {});
+  }, []);
 
   const statusFilter = searchParams.get("status") ?? "";
   const q            = searchParams.get("q") ?? "";
@@ -98,10 +109,35 @@ export default function LeadsPage() {
     setPanelNotes(lead.notes ?? "");
     setPanelStatus(lead.status);
     setPanelSuccess(false);
+    setConfirmDeleteId(null);
+    setDeleteError("");
   }
 
   function closePanel() {
     setSelectedLead(null);
+    setConfirmDeleteId(null);
+  }
+
+  async function deleteLead(id: number) {
+    setDeletingId(id);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/leads/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setDeleteError(err.error || "Erro ao excluir lead");
+        return;
+      }
+      setConfirmDeleteId(null);
+      if (selectedLead?.id === id) setSelectedLead(null);
+      // Se era o último da página, volta uma página
+      if (data && data.data.length === 1 && page > 1) pushPage(page - 1);
+      else fetchData();
+    } catch {
+      setDeleteError("Erro de conexão");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   async function savePanel() {
@@ -178,6 +214,10 @@ export default function LeadsPage() {
         </div>
       </div>
 
+      {deleteError && !selectedLead && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">{deleteError}</div>
+      )}
+
       {/* Table */}
       <div className="bg-white border border-neutral-200 overflow-hidden">
         {loading ? (
@@ -242,13 +282,45 @@ export default function LeadsPage() {
                           {sc.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={e => { e.stopPropagation(); openPanel(lead); }}
-                          className="text-xs px-2.5 py-1.5 border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition-colors"
-                        >
-                          Ver
-                        </button>
+                      <td className="px-4 py-3 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                        {confirmDeleteId === lead.id && !selectedLead ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="text-xs text-neutral-600">Excluir?</span>
+                            <button
+                              onClick={() => deleteLead(lead.id)}
+                              disabled={deletingId === lead.id}
+                              className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                            >
+                              {deletingId === lead.id && <Loader2 size={12} className="animate-spin" />}
+                              Sim
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-xs px-2.5 py-1.5 border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                            >
+                              Não
+                            </button>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => openPanel(lead)}
+                              className="text-xs px-2.5 py-1.5 border border-neutral-300 text-neutral-700 hover:bg-neutral-50 transition-colors"
+                            >
+                              Ver
+                            </button>
+                            {canDelete && (
+                              <button
+                                onClick={() => { setDeleteError(""); setConfirmDeleteId(lead.id); }}
+                                aria-label={`Excluir lead ${lead.name}`}
+                                title="Excluir lead"
+                                className="inline-flex items-center justify-center px-2 py-1.5 border border-neutral-300 text-neutral-500 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-colors"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -359,19 +431,54 @@ export default function LeadsPage() {
             </div>
 
             {/* Panel footer */}
-            <div className="px-6 py-4 border-t border-neutral-200 flex items-center justify-between gap-3">
-              {panelSuccess && (
-                <span className="text-sm text-green-600 font-medium">Salvo com sucesso!</span>
+            <div className="px-6 py-4 border-t border-neutral-200 space-y-3">
+              {deleteError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2">{deleteError}</div>
               )}
-              {!panelSuccess && <span />}
-              <button
+              {confirmDeleteId === selectedLead.id ? (
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-neutral-700">Excluir este lead definitivamente?</span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="px-4 py-2.5 text-sm font-medium text-neutral-700 border border-neutral-300 hover:bg-neutral-50 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => deleteLead(selectedLead.id)}
+                      disabled={deletingId === selectedLead.id}
+                      className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                    >
+                      {deletingId === selectedLead.id && <Loader2 size={14} className="animate-spin" />}
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  {canDelete ? (
+                    <button
+                      onClick={() => { setDeleteError(""); setConfirmDeleteId(selectedLead.id); }}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+                    >
+                      <Trash2 size={15} />
+                      Excluir lead
+                    </button>
+                  ) : <span />}
+                  {panelSuccess && (
+                    <span className="text-sm text-green-600 font-medium">Salvo com sucesso!</span>
+                  )}
+                  <button
                 onClick={savePanel}
                 disabled={savingPanel}
                 className="inline-flex items-center gap-2 bg-neutral-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
               >
                 {savingPanel && <Loader2 size={14} className="animate-spin" />}
                 {savingPanel ? "Salvando..." : "Salvar"}
-              </button>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

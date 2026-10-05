@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { auditLog } from "@/lib/audit";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -23,5 +24,23 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "UNAUTHORIZED") return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     return NextResponse.json({ error: "Erro" }, { status: 500 });
+  }
+}
+
+export async function DELETE(_req: NextRequest, { params }: RouteContext) {
+  try {
+    const session = await requireAuth(["super_admin", "admin"]);
+    const { id } = await params;
+    const leadId = Number(id);
+    const lead = await queryOne("SELECT * FROM leads WHERE id=?", [leadId]);
+    if (!lead) return NextResponse.json({ error: "Lead não encontrado" }, { status: 404 });
+
+    await query("DELETE FROM leads WHERE id=?", [leadId]);
+    await auditLog({ userId: session.id, action: "delete", entity: "lead", entityId: leadId, oldData: lead });
+    return NextResponse.json({ ok: true });
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "UNAUTHORIZED") return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    if (e instanceof Error && e.message === "FORBIDDEN") return NextResponse.json({ error: "Sem permissão para excluir leads" }, { status: 403 });
+    return NextResponse.json({ error: "Erro ao excluir lead" }, { status: 500 });
   }
 }

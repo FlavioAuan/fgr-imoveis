@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, X, Loader2, Phone, Mail, Award } from "lucide-react";
+import { Plus, X, Loader2, Phone, Mail, Award, Pencil } from "lucide-react";
 
 interface Agent {
   id: number;
@@ -20,7 +20,10 @@ interface AgentForm {
   email: string;
   creci: string;
   bio: string;
+  active: boolean;
 }
+
+const emptyForm: AgentForm = { name: "", phone: "", email: "", creci: "", bio: "", active: true };
 
 const inputCls = "w-full border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors bg-white";
 
@@ -32,16 +35,15 @@ export default function CorretoresPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const [form, setForm] = useState<AgentForm>({
-    name: "", phone: "", email: "", creci: "", bio: "",
-  });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState<AgentForm>(emptyForm);
 
-  const set = (key: keyof AgentForm, value: string) =>
+  const set = <K extends keyof AgentForm>(key: K, value: AgentForm[K]) =>
     setForm(p => ({ ...p, [key]: value }));
 
   function fetchAgents() {
     setLoading(true);
-    fetch("/api/agents")
+    fetch("/api/agents?all=1")
       .then(r => r.json())
       .then(data => setAgents(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
@@ -50,7 +52,23 @@ export default function CorretoresPage() {
   useEffect(() => { fetchAgents(); }, []);
 
   function openModal() {
-    setForm({ name: "", phone: "", email: "", creci: "", bio: "" });
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+    setSuccess(false);
+    setModalOpen(true);
+  }
+
+  function openEdit(agent: Agent) {
+    setEditingId(agent.id);
+    setForm({
+      name: agent.name,
+      phone: agent.phone ?? "",
+      email: agent.email ?? "",
+      creci: agent.creci ?? "",
+      bio: agent.bio ?? "",
+      active: Boolean(Number(agent.active)),
+    });
     setError("");
     setSuccess(false);
     setModalOpen(true);
@@ -66,8 +84,8 @@ export default function CorretoresPage() {
     setSuccess(false);
     setSaving(true);
     try {
-      const res = await fetch("/api/agents", {
-        method: "POST",
+      const res = await fetch(editingId ? `/api/agents/${editingId}` : "/api/agents", {
+        method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name,
@@ -75,6 +93,7 @@ export default function CorretoresPage() {
           email: form.email || null,
           creci: form.creci || null,
           bio: form.bio || null,
+          active: form.active,
         }),
       });
       if (res.ok) {
@@ -83,7 +102,7 @@ export default function CorretoresPage() {
         setTimeout(() => closeModal(), 1200);
       } else {
         const err = await res.json();
-        setError(err.error || "Erro ao criar corretor");
+        setError(err.error || (editingId ? "Erro ao salvar corretor" : "Erro ao criar corretor"));
       }
     } catch {
       setError("Erro de conexão");
@@ -178,12 +197,19 @@ export default function CorretoresPage() {
                 </p>
               )}
 
-              <div className="mt-auto pt-1">
+              <div className="mt-auto pt-1 flex items-center justify-between gap-2">
                 <span className={`inline-flex px-2 py-0.5 text-xs font-medium ${
-                  agent.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
+                  Number(agent.active) ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
                 }`}>
-                  {agent.active ? "Ativo" : "Inativo"}
+                  {Number(agent.active) ? "Ativo" : "Inativo"}
                 </span>
+                <button
+                  onClick={() => openEdit(agent)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 border border-neutral-300 hover:border-neutral-900 hover:text-neutral-900 transition-colors"
+                >
+                  <Pencil size={12} />
+                  Editar
+                </button>
               </div>
             </div>
           ))}
@@ -195,7 +221,7 @@ export default function CorretoresPage() {
           <div className="absolute inset-0 bg-black/40" onClick={closeModal} />
           <div className="relative bg-white w-full max-w-md shadow-xl">
             <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
-              <h2 className="font-bold text-neutral-900">Novo corretor</h2>
+              <h2 className="font-bold text-neutral-900">{editingId ? "Editar corretor" : "Novo corretor"}</h2>
               <button onClick={closeModal} className="text-neutral-400 hover:text-neutral-900 transition-colors">
                 <X size={20} />
               </button>
@@ -207,7 +233,7 @@ export default function CorretoresPage() {
               )}
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3">
-                  Corretor cadastrado com sucesso!
+                  {editingId ? "Alterações salvas com sucesso!" : "Corretor cadastrado com sucesso!"}
                 </div>
               )}
 
@@ -231,7 +257,7 @@ export default function CorretoresPage() {
                     type="tel"
                     value={form.phone}
                     onChange={e => set("phone", e.target.value)}
-                    placeholder="(11) 99999-9999"
+                    placeholder="(19) 99999-9999"
                     className={inputCls}
                   />
                 </div>
@@ -269,6 +295,18 @@ export default function CorretoresPage() {
                 />
               </div>
 
+              {editingId && (
+                <label className="flex items-center gap-2.5 text-sm text-neutral-700 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={form.active}
+                    onChange={e => set("active", e.target.checked)}
+                    className="w-4 h-4 accent-neutral-900"
+                  />
+                  Corretor ativo (aparece no site e no cadastro de imóveis)
+                </label>
+              )}
+
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -283,7 +321,7 @@ export default function CorretoresPage() {
                   className="inline-flex items-center gap-2 bg-neutral-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
                 >
                   {saving && <Loader2 size={14} className="animate-spin" />}
-                  {saving ? "Salvando..." : "Cadastrar"}
+                  {saving ? "Salvando..." : editingId ? "Salvar alterações" : "Cadastrar"}
                 </button>
               </div>
             </form>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, X, Loader2, Eye, EyeOff } from "lucide-react";
+import { Plus, X, Loader2, Eye, EyeOff, Pencil } from "lucide-react";
 
 interface User {
   id: number;
@@ -18,7 +18,10 @@ interface NewUserForm {
   email: string;
   password: string;
   role: string;
+  active: boolean;
 }
+
+const emptyForm: NewUserForm = { name: "", email: "", password: "", role: "corretor", active: true };
 
 const roleConfig: Record<string, { label: string; cls: string }> = {
   super_admin: { label: "Super Admin", cls: "bg-neutral-900 text-white" },
@@ -45,11 +48,14 @@ export default function UsuariosPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const [form, setForm] = useState<NewUserForm>({
-    name: "", email: "", password: "", role: "corretor",
-  });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: number; role: string } | null>(null);
+  const [form, setForm] = useState<NewUserForm>(emptyForm);
 
-  const set = (key: keyof NewUserForm, value: string) =>
+  const isSuperAdmin = currentUser?.role === "super_admin";
+  const editingSelf = editingId !== null && editingId === currentUser?.id;
+
+  const set = <K extends keyof NewUserForm>(key: K, value: NewUserForm[K]) =>
     setForm(p => ({ ...p, [key]: value }));
 
   function fetchUsers() {
@@ -60,10 +66,32 @@ export default function UsuariosPage() {
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+    fetch("/api/auth/me")
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => setCurrentUser(data))
+      .catch(() => {});
+  }, []);
 
   function openModal() {
-    setForm({ name: "", email: "", password: "", role: "corretor" });
+    setEditingId(null);
+    setForm(emptyForm);
+    setError("");
+    setSuccess(false);
+    setShowPass(false);
+    setModalOpen(true);
+  }
+
+  function openEdit(user: User) {
+    setEditingId(user.id);
+    setForm({
+      name: user.name,
+      email: user.email,
+      password: "",
+      role: user.role,
+      active: Boolean(Number(user.active)),
+    });
     setError("");
     setSuccess(false);
     setShowPass(false);
@@ -80,8 +108,8 @@ export default function UsuariosPage() {
     setSuccess(false);
     setSaving(true);
     try {
-      const res = await fetch("/api/users", {
-        method: "POST",
+      const res = await fetch(editingId ? `/api/users/${editingId}` : "/api/users", {
+        method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
@@ -93,7 +121,7 @@ export default function UsuariosPage() {
         }, 1200);
       } else {
         const err = await res.json();
-        setError(err.error || "Erro ao criar usuário");
+        setError(err.error || (editingId ? "Erro ao salvar usuário" : "Erro ao criar usuário"));
       }
     } catch {
       setError("Erro de conexão");
@@ -150,6 +178,7 @@ export default function UsuariosPage() {
                   <th className="text-left px-4 py-3 font-semibold text-neutral-600">Perfil</th>
                   <th className="text-left px-4 py-3 font-semibold text-neutral-600">Status</th>
                   <th className="text-left px-4 py-3 font-semibold text-neutral-600">Último acesso</th>
+                  {isSuperAdmin && <th className="text-right px-4 py-3 font-semibold text-neutral-600">Ações</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
@@ -173,16 +202,27 @@ export default function UsuariosPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex px-2 py-0.5 text-xs font-medium ${
-                          user.active
+                          Number(user.active)
                             ? "bg-green-100 text-green-700"
                             : "bg-red-100 text-red-600"
                         }`}>
-                          {user.active ? "Ativo" : "Inativo"}
+                          {Number(user.active) ? "Ativo" : "Inativo"}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-neutral-500 text-xs whitespace-nowrap">
                         {formatDate(user.last_login)}
                       </td>
+                      {isSuperAdmin && (
+                        <td className="px-4 py-3 text-right">
+                          <button
+                            onClick={() => openEdit(user)}
+                            className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 border border-neutral-300 text-neutral-700 hover:border-neutral-900 hover:text-neutral-900 transition-colors"
+                          >
+                            <Pencil size={12} />
+                            Editar
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
@@ -202,7 +242,7 @@ export default function UsuariosPage() {
           <div className="relative bg-white w-full max-w-md shadow-xl">
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
-              <h2 className="font-bold text-neutral-900">Novo usuário</h2>
+              <h2 className="font-bold text-neutral-900">{editingId ? "Editar usuário" : "Novo usuário"}</h2>
               <button onClick={closeModal} className="text-neutral-400 hover:text-neutral-900 transition-colors">
                 <X size={20} />
               </button>
@@ -217,7 +257,7 @@ export default function UsuariosPage() {
               )}
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3">
-                  Usuário criado com sucesso!
+                  {editingId ? "Alterações salvas com sucesso!" : "Usuário criado com sucesso!"}
                 </div>
               )}
 
@@ -249,14 +289,15 @@ export default function UsuariosPage() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-neutral-700">
-                  Senha <span className="text-red-500">*</span>
+                  {editingId ? "Nova senha" : <>Senha <span className="text-red-500">*</span></>}
                 </label>
                 <div className="relative">
                   <input
-                    type={showPass ? "text" : "password"} required minLength={6}
+                    type={showPass ? "text" : "password"} required={!editingId} minLength={6}
                     value={form.password}
                     onChange={e => set("password", e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={editingId ? "Deixe em branco para manter a atual" : "Mínimo 6 caracteres"}
+                    autoComplete="new-password"
                     className={`${inputCls} pr-10`}
                   />
                   <button
@@ -274,13 +315,29 @@ export default function UsuariosPage() {
                 <select
                   value={form.role}
                   onChange={e => set("role", e.target.value)}
+                  disabled={editingSelf}
                   className="w-full border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-neutral-900 transition-colors bg-white appearance-none"
                 >
                   <option value="corretor">Corretor</option>
                   <option value="admin">Admin</option>
                   <option value="super_admin">Super Admin</option>
                 </select>
+                {editingSelf && (
+                  <p className="text-xs text-neutral-500">Você não pode alterar o perfil do seu próprio usuário.</p>
+                )}
               </div>
+
+              {editingId && !editingSelf && (
+                <label className="flex items-center gap-2.5 text-sm text-neutral-700 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={form.active}
+                    onChange={e => set("active", e.target.checked)}
+                    className="w-4 h-4 accent-neutral-900"
+                  />
+                  Usuário ativo (pode acessar o painel)
+                </label>
+              )}
 
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
@@ -296,7 +353,7 @@ export default function UsuariosPage() {
                   className="inline-flex items-center gap-2 bg-neutral-900 text-white px-5 py-2.5 text-sm font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
                 >
                   {saving && <Loader2 size={14} className="animate-spin" />}
-                  {saving ? "Criando..." : "Criar usuário"}
+                  {saving ? "Salvando..." : editingId ? "Salvar alterações" : "Criar usuário"}
                 </button>
               </div>
             </form>

@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  // ?all=1 inclui inativos (somente para o painel admin)
+  if (req.nextUrl.searchParams.get("all") === "1") {
+    try {
+      await requireAuth(["super_admin", "admin"]);
+    } catch {
+      return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    }
+    const agents = await query("SELECT * FROM agents ORDER BY active DESC, name ASC");
+    return NextResponse.json(agents);
+  }
   const agents = await query("SELECT * FROM agents WHERE active=1 ORDER BY name ASC");
   return NextResponse.json(agents);
 }
