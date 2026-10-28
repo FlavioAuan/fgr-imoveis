@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { advertiserError, requireAdvertiser } from "@/lib/advertiserAuth";
-import { getStripe, isStripeConfigured, syncSubscription } from "@/lib/stripe";
+import { applyOneTimeCheckout, getStripe, isStripeConfigured, syncSubscription } from "@/lib/stripe";
 
 // POST — chamado na volta do Checkout. Sincroniza a assinatura sem esperar o webhook.
 export async function POST(req: NextRequest) {
@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     if (session.subscription && typeof session.subscription !== "string") {
       await syncSubscription(session.subscription);
     }
+    await applyOneTimeCheckout(session);
     return NextResponse.json({ ok: true, status: session.status });
   } catch (e) {
     return advertiserError(e, "Erro ao confirmar pagamento");

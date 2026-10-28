@@ -13,7 +13,7 @@ const tabs = [
   { label: "Painel", href: "/anunciante", icon: LayoutDashboard, exact: true },
   { label: "Meus anúncios", href: "/anunciante/imoveis", icon: Building2 },
   { label: "Contatos", href: "/anunciante/leads", icon: MessageSquare },
-  { label: "Plano e pagamento", href: "/anunciante/plano", icon: CreditCard },
+  { label: "Pagamento", href: "/anunciante/plano", icon: CreditCard },
 ];
 
 export default function AnuncianteLayout({ children }: { children: React.ReactNode }) {

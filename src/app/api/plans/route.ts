@@ -35,10 +35,11 @@ export async function POST(req: NextRequest) {
     let insertedId: number;
     try {
       insertedId = await insert(
-        `INSERT INTO plans (name,slug,description,price,billing_interval,trial_days,max_listings,
-          max_featured,features,highlighted,active,display_order)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
-        [p.name, p.slug || slugify(p.name), p.description, p.price, p.billing_interval, p.trial_days,
+        `INSERT INTO plans (name,slug,audience,description,price,billing_interval,duration_days,trial_days,
+          max_listings,max_featured,features,highlighted,active,display_order)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [p.name, p.slug || slugify(p.name), p.audience, p.description, p.price, p.billing_interval,
+          p.duration_days, p.trial_days,
           p.max_listings, p.max_featured, p.features, p.highlighted, p.active, p.display_order]
       );
     } catch (err: unknown) {

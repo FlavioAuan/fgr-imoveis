@@ -7,7 +7,6 @@ import { mapDBToProperty } from "@/lib/propertyMapper";
 import { PropertyGallery } from "@/components/properties/PropertyGallery";
 import { PropertyContactForm } from "@/components/properties/PropertyContactForm";
 import { formatCurrency, formatArea } from "@/lib/utils";
-import { getWhatsAppUrl } from "@/lib/config";
 import { PUBLIC_LISTING_SQL } from "@/lib/plans";
 import { propertyTypeLabels, propertyTransactionLabels } from "@/types/property";
 
@@ -225,19 +224,9 @@ export default async function PropertyPage({ params }: Props) {
                     {row.advertiser_kind === "proprietario" ? "Proprietário" : row.advertiser_kind === "corretor" ? "Corretor" : "Imobiliária"}
                     {row.advertiser_creci ? ` · CRECI ${String(row.advertiser_creci)}` : ""}
                   </p>
-                  {row.advertiser_phone ? (
-                    <a
-                      href={getWhatsAppUrl(
-                        `Olá! Vi no portal FGR Imóveis o imóvel ${property.title} (Código: ${property.code}) e gostaria de mais informações.`,
-                        String(row.advertiser_phone)
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-dark w-full mt-4"
-                    >
-                      Falar com o anunciante no WhatsApp
-                    </a>
-                  ) : null}
+                  <p className="text-xs text-neutral-500 mt-3 leading-relaxed">
+                    Você fala e negocia direto com quem anuncia. A FGR Imóveis é o portal e não intermedeia a negociação.
+                  </p>
                 </div>
               )}
               <PropertyContactForm
@@ -245,6 +234,8 @@ export default async function PropertyPage({ params }: Props) {
                 propertyCode={property.code}
                 propertyId={Number(row.id)}
                 propertySlug={slug}
+                whatsappNumber={row.advertiser_id != null && row.advertiser_phone ? String(row.advertiser_phone) : null}
+                advertiserName={row.advertiser_id != null ? String(row.advertiser_company || row.advertiser_name) : null}
               />
             </div>
           </div>

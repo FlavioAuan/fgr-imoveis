@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query, queryOne } from "@/lib/db";
 import { advertiserError, getAdvertiserPlan, requireAdvertiser } from "@/lib/advertiserAuth";
-import { isLiveStatus, mapPlan } from "@/lib/plans";
+import { isLiveAccount, mapPlan } from "@/lib/plans";
 
 // GET — conta, plano, uso do plano e últimos pagamentos
 export async function GET() {
@@ -24,15 +24,19 @@ export async function GET() {
       ),
     ]);
 
+    const live = isLiveAccount(account);
     const { stripe_customer_id, stripe_subscription_id, ...publicAccount } = account;
+    // Anúncio avulso vencido aparece como "expired" no painel
+    const status = !live && account.subscription_status === "active" ? "expired" : account.subscription_status;
     return NextResponse.json({
       account: {
         ...publicAccount,
+        subscription_status: status,
         hasBillingAccount: Boolean(stripe_customer_id),
         hasSubscription: Boolean(stripe_subscription_id),
       },
       plan: planRow ? mapPlan(planRow) : null,
-      live: isLiveStatus(account.subscription_status),
+      live,
       usage: {
         listings: Number(usage?.listings ?? 0),
         featured: Number(usage?.featured ?? 0),

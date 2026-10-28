@@ -61,9 +61,11 @@ CREATE TABLE IF NOT EXISTS `plans` (
   `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `name`              VARCHAR(100) NOT NULL,
   `slug`              VARCHAR(120) NOT NULL,
+  `audience`          ENUM('profissional','proprietario') NOT NULL DEFAULT 'profissional',
   `description`       VARCHAR(500) NULL,
   `price`             DECIMAL(10,2) NOT NULL DEFAULT 0,
-  `billing_interval`  ENUM('month','year') NOT NULL DEFAULT 'month',
+  `billing_interval`  ENUM('month','year','once') NOT NULL DEFAULT 'month',
+  `duration_days`     SMALLINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Prazo do pagamento único (billing_interval = once)',
   `trial_days`        SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   `max_listings`      INT UNSIGNED NULL COMMENT 'NULL = ilimitado',
   `max_featured`      INT UNSIGNED NOT NULL DEFAULT 0,
@@ -97,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `advertisers` (
   `subscription_status`    VARCHAR(30) NULL COMMENT 'Status do Stripe: active, trialing, past_due, canceled...',
   `current_period_end`     DATETIME NULL,
   `cancel_at_period_end`   TINYINT(1) NOT NULL DEFAULT 0,
+  `last_checkout_session`  VARCHAR(100) NULL,
   `last_login`             DATETIME NULL,
   `created_at`             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -336,3 +339,8 @@ INSERT IGNORE INTO `plans` (`name`,`slug`,`description`,`price`,`billing_interva
 ('Corretor','corretor','Para corretores autônomos que querem aparecer no portal.',79.00,'month',0,15,1,'Até 15 anúncios ativos\n1 anúncio em destaque\nLeads direto no seu painel\nContato por WhatsApp e formulário',0,1),
 ('Imobiliária','imobiliaria','Para imobiliárias que querem todo o estoque no portal.',199.00,'month',0,80,5,'Até 80 anúncios ativos\n5 anúncios em destaque\nLeads direto no seu painel\nRelatório mensal de visitas e contatos',1,2),
 ('Imobiliária Plus','imobiliaria-plus','Estoque ilimitado e mais destaque na busca.',399.00,'month',0,NULL,15,'Anúncios ilimitados\n15 anúncios em destaque\nLeads direto no seu painel\nRelatório mensal de visitas e contatos\nAtendimento prioritário',0,3);
+
+-- Anúncios avulsos iniciais (o Admin pode editar preço, prazo e benefícios)
+INSERT IGNORE INTO `plans` (`name`,`slug`,`audience`,`description`,`price`,`billing_interval`,`duration_days`,`max_listings`,`max_featured`,`features`,`highlighted`,`display_order`) VALUES
+('Anúncio simples','anuncio-simples','proprietario','Um imóvel no portal por 60 dias, sem mensalidade.',49.00,'once',60,1,0,'Até 30 fotos\nContatos direto no seu WhatsApp e no painel\nEdite o anúncio quando quiser',0,1),
+('Anúncio destaque','anuncio-destaque','proprietario','Um imóvel em destaque na página inicial por 60 dias.',89.00,'once',60,1,1,'Aparece em destaque na página inicial\nAté 30 fotos\nContatos direto no seu WhatsApp e no painel',1,2);

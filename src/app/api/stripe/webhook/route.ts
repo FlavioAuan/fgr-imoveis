@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { query } from "@/lib/db";
-import { getStripe, recordInvoice, syncSubscription } from "@/lib/stripe";
+import { applyOneTimeCheckout, getStripe, recordInvoice, syncSubscription } from "@/lib/stripe";
 
 // POST — eventos do Stripe. Cadastre no Dashboard: Developers > Webhooks > {APP_URL}/api/stripe/webhook
 export async function POST(req: NextRequest) {
@@ -36,8 +36,13 @@ export async function POST(req: NextRequest) {
         if (subscriptionId) {
           await syncSubscription(await getStripe().subscriptions.retrieve(subscriptionId));
         }
+        await applyOneTimeCheckout(session);
         break;
       }
+      // Pix/boleto confirmados depois do fim do Checkout
+      case "checkout.session.async_payment_succeeded":
+        await applyOneTimeCheckout(event.data.object);
+        break;
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":

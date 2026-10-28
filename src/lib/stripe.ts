@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { query, queryOne } from "./db";
+import pool, { query, queryOne } from "./db";
 import type { PlanRow } from "./plans";
 
 let client: Stripe | null = null;
@@ -47,7 +47,8 @@ export async function ensurePlanPrice(plan: PlanRow): Promise<string> {
   if (plan.stripe_price_id) {
     const current = await stripe.prices.retrieve(plan.stripe_price_id);
     const sameAmount = current.unit_amount === Math.round(Number(plan.price) * 100);
-    const sameInterval = current.recurring?.interval === plan.billing_interval;
+    const sameInterval =
+      plan.billing_interval === "once" ? !current.recurring : current.recurring?.interval === plan.billing_interval;
     if (current.active && sameAmount && sameInterval && current.product === productId) {
       await query("UPDATE plans SET stripe_product_id=? WHERE id=?", [productId, plan.id]);
       return current.id;
@@ -59,7 +60,7 @@ export async function ensurePlanPrice(plan: PlanRow): Promise<string> {
     product: productId,
     currency: "brl",
     unit_amount: Math.round(Number(plan.price) * 100),
-    recurring: { interval: plan.billing_interval },
+    ...(plan.billing_interval === "once" ? {} : { recurring: { interval: plan.billing_interval } }),
     metadata: { plan_id: String(plan.id) },
   });
 
@@ -77,6 +78,34 @@ export async function archivePlanInStripe(plan: PlanRow): Promise<void> {
 
 function toDate(unix: number | null | undefined): Date | null {
   return unix ? new Date(unix * 1000) : null;
+}
+
+/**
+ * Aplica um anúncio avulso pago (Checkout em modo "payment"). Renovar antes do fim soma o
+ * prazo ao que ainda resta. Cada sessão do Checkout é aplicada uma única vez, mesmo que
+ * chegue pelo retorno da página e pelo webhook.
+ */
+export async function applyOneTimeCheckout(session: Stripe.Checkout.Session): Promise<boolean> {
+  if (session.mode !== "payment" || session.payment_status !== "paid") return false;
+  const advertiserId = Number(session.client_reference_id || session.metadata?.advertiser_id);
+  const planId = Number(session.metadata?.plan_id);
+  if (!advertiserId || !planId) return false;
+
+  const plan = await queryOne<{ duration_days: number }>("SELECT duration_days FROM plans WHERE id=?", [planId]);
+  if (!plan) return false;
+
+  const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+  const [result] = await pool.execute(
+    `UPDATE advertisers SET
+       current_period_end=DATE_ADD(
+         IF(plan_id=? AND current_period_end > NOW(), current_period_end, NOW()),
+         INTERVAL ? DAY),
+       plan_id=?, subscription_status='active', stripe_subscription_id=NULL, cancel_at_period_end=0,
+       stripe_customer_id=COALESCE(stripe_customer_id, ?), last_checkout_session=?
+     WHERE id=? AND (last_checkout_session IS NULL OR last_checkout_session<>?)`,
+    [planId, Number(plan.duration_days), planId, customerId, session.id, advertiserId, session.id]
+  );
+  return (result as { affectedRows: number }).affectedRows > 0;
 }
 
 /** Copia o estado de uma assinatura do Stripe para o anunciante. */

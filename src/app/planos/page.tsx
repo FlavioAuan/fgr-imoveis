@@ -17,7 +17,7 @@ const reasons = [
 ];
 
 export default async function PlanosPage() {
-  const plans = await listActivePlans();
+  const plans = await listActivePlans("profissional");
 
   return (
     <div className="min-h-screen bg-neutral-50 pt-20 lg:pt-24">
@@ -43,7 +43,9 @@ export default async function PlanosPage() {
           )}
         />
         <p className="mt-6 text-center text-sm text-neutral-500">
-          Já tem conta? <Link href="/anunciante/login" className="font-semibold text-neutral-900 underline underline-offset-2">Entrar no painel</Link>
+          É proprietário e quer anunciar um imóvel só?{" "}
+          <Link href="/venda-seu-imovel" className="font-semibold text-neutral-900 underline underline-offset-2">Veja o anúncio avulso</Link>
+          {" · "}Já tem conta? <Link href="/anunciante/login" className="font-semibold text-neutral-900 underline underline-offset-2">Entrar no painel</Link>
         </p>
       </section>
 

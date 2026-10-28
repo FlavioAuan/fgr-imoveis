@@ -57,21 +57,33 @@ export async function POST(req: NextRequest) {
 
     const appUrl = getAppUrl(req.nextUrl.origin);
     const metadata = { advertiser_id: String(account.id), plan_id: String(plan.id) };
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+    const common = {
       customer: customerId,
       client_reference_id: String(account.id),
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: {
-        metadata,
-        ...(Number(plan.trial_days) > 0 ? { trial_period_days: Number(plan.trial_days) } : {}),
-      },
       metadata,
       allow_promotion_codes: true,
-      locale: "pt-BR",
+      locale: "pt-BR" as const,
       success_url: `${appUrl}/anunciante/plano?checkout=sucesso&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/anunciante/plano?checkout=cancelado`,
-    });
+    };
+
+    // Anúncio avulso: pagamento único, com fatura para aparecer em "Pagamentos"
+    const session = plan.billing_interval === "once"
+      ? await stripe.checkout.sessions.create({
+          ...common,
+          mode: "payment",
+          invoice_creation: { enabled: true, invoice_data: { metadata } },
+          payment_intent_data: { metadata },
+        })
+      : await stripe.checkout.sessions.create({
+          ...common,
+          mode: "subscription",
+          subscription_data: {
+            metadata,
+            ...(Number(plan.trial_days) > 0 ? { trial_period_days: Number(plan.trial_days) } : {}),
+          },
+        });
 
     return NextResponse.json({ url: session.url });
   } catch (e) {

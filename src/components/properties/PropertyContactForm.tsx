@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, MessageCircle, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { siteConfig } from "@/lib/config";
+import { getWhatsAppUrl as whatsAppUrlFor, siteConfig } from "@/lib/config";
 import { useWhatsAppUrl } from "@/components/providers/SiteContactProvider";
 import { saveLead } from "@/lib/leads";
 
@@ -13,6 +13,10 @@ interface PropertyContactFormProps {
   propertyCode: string;
   propertyId: number;
   propertySlug: string;
+  /** WhatsApp do anunciante. Quando informado, o contato vai direto para ele. */
+  whatsappNumber?: string | null;
+  /** Nome de quem anuncia, para o texto do formulário */
+  advertiserName?: string | null;
 }
 
 const waInputClass =
@@ -22,6 +26,8 @@ export function PropertyContactForm({
   propertyTitle,
   propertyId,
   propertySlug,
+  whatsappNumber,
+  advertiserName,
 }: PropertyContactFormProps) {
   const getWhatsAppUrl = useWhatsAppUrl();
   const [submitted, setSubmitted] = useState(false);
@@ -74,7 +80,7 @@ export function PropertyContactForm({
       property_id: propertyId,
       source: "whatsapp_imovel",
     });
-    window.open(getWhatsAppUrl(message), "_blank");
+    window.open(whatsappNumber ? whatsAppUrlFor(message, whatsappNumber) : getWhatsAppUrl(message), "_blank");
     setShowWaForm(false);
     setWaForm({ name: "", whatsapp: "" });
     setWaLoading(false);
@@ -86,7 +92,9 @@ export function PropertyContactForm({
         Tenho interesse neste imóvel
       </h3>
       <p className="text-xs text-neutral-500 mb-5">
-        Preencha o formulário e entraremos em contato em breve.
+        {advertiserName
+          ? `Sua mensagem vai direto para ${advertiserName}, que anuncia este imóvel.`
+          : "Preencha o formulário e entraremos em contato em breve."}
       </p>
 
       {/* WhatsApp section */}
@@ -153,7 +161,7 @@ export function PropertyContactForm({
           <CheckCircle2 size={40} className="text-neutral-900 mx-auto mb-3" />
           <p className="font-semibold text-neutral-900 mb-1">Mensagem enviada!</p>
           <p className="text-xs text-neutral-500">
-            Nossa equipe responderá em breve.
+            {advertiserName ? `${advertiserName} vai responder em breve.` : "Nossa equipe responderá em breve."}
           </p>
         </div>
       ) : (

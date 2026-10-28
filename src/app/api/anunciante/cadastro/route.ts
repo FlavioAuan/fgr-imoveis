@@ -20,6 +20,9 @@ export async function POST(req: NextRequest) {
     if (password.length < 8) {
       return NextResponse.json({ error: "A senha deve ter pelo menos 8 caracteres" }, { status: 400 });
     }
+    if (kind === "proprietario" && !String(body.phone ?? "").replace(/\D/g, "")) {
+      return NextResponse.json({ error: "Informe seu WhatsApp: é por ele que os interessados vão falar com você" }, { status: 400 });
+    }
     if (!body.acceptTerms) {
       return NextResponse.json({ error: "É preciso aceitar os termos de uso" }, { status: 400 });
     }

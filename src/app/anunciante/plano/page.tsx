@@ -23,6 +23,8 @@ function PlanoContent() {
   const confirmed = useRef(false);
 
   const { account, plan, payments } = data;
+  const isOwner = account.kind === "proprietario";
+  const audiencePlans = plans.filter(p => p.audience === (isOwner ? "proprietario" : "profissional"));
   const badge = statusBadge(account.subscription_status);
   const hasManagedSubscription = account.hasSubscription && !["canceled", "incomplete_expired"].includes(account.subscription_status ?? "");
 
@@ -110,13 +112,17 @@ function PlanoContent() {
           </p>
           {account.current_period_end && (
             <p className="mt-1 text-sm text-neutral-500">
-              {account.cancel_at_period_end
-                ? `Cancelado. Os anúncios saem do ar em ${formatDate(account.current_period_end)}.`
-                : `Próxima cobrança em ${formatDate(account.current_period_end)}.`}
+              {!account.hasSubscription
+                ? data.live
+                  ? `Anúncio no ar até ${formatDate(account.current_period_end)}.`
+                  : `O prazo acabou em ${formatDate(account.current_period_end)}. Renove para voltar ao ar.`
+                : account.cancel_at_period_end
+                  ? `Cancelado. Os anúncios saem do ar em ${formatDate(account.current_period_end)}.`
+                  : `Próxima cobrança em ${formatDate(account.current_period_end)}.`}
             </p>
           )}
         </div>
-        {account.hasBillingAccount && (
+        {account.hasBillingAccount && account.hasSubscription && (
           <button onClick={openPortal} disabled={busy !== null} className="btn btn-outline">
             {busy === "portal" ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
             Gerenciar assinatura
@@ -137,12 +143,15 @@ function PlanoContent() {
       )}
 
       <div>
-        <h2 className="text-lg font-bold text-neutral-900 mb-5">{plan ? "Planos disponíveis" : "Escolha seu plano"}</h2>
+        <h2 className="text-lg font-bold text-neutral-900 mb-5">
+          {isOwner ? (plan ? "Renovar ou trocar o anúncio" : "Escolha seu anúncio") : plan ? "Planos disponíveis" : "Escolha seu plano"}
+        </h2>
         <PlanCards
-          plans={plans}
+          plans={audiencePlans}
           currentPlanId={data.live ? account.plan_id : null}
           action={(p, isCurrent) =>
-            isCurrent ? (
+            // Anúncio avulso pode ser renovado antes do fim: o prazo se soma
+            isCurrent && p.billingInterval !== "once" ? (
               <span className="btn w-full bg-neutral-100 text-neutral-500 cursor-default">Seu plano atual</span>
             ) : (
               <button
@@ -151,7 +160,13 @@ function PlanoContent() {
                 className={cn("btn w-full", p.highlighted || p.id === preselected ? "btn-dark" : "btn-outline")}
               >
                 {busy === p.id && <Loader2 size={16} className="animate-spin" />}
-                {hasManagedSubscription ? "Trocar para este plano" : p.price === 0 ? "Ativar grátis" : p.trialDays > 0 ? "Começar teste grátis" : "Assinar com cartão"}
+                {hasManagedSubscription
+                  ? "Trocar para este plano"
+                  : p.price === 0
+                    ? "Ativar grátis"
+                    : p.billingInterval === "once"
+                      ? isCurrent ? `Renovar por mais ${p.durationDays} dias` : "Pagar anúncio"
+                      : p.trialDays > 0 ? "Começar teste grátis" : "Assinar com cartão"}
               </button>
             )
           }

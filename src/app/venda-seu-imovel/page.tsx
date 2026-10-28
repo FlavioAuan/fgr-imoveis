@@ -1,95 +1,59 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Camera, CreditCard, MessageCircle, UserPlus } from "lucide-react";
+import { PlanCards } from "@/components/marketplace/PlanCards";
+import { listActivePlans } from "@/lib/plans";
 
-import { useState } from "react";
-import { CheckCircle2, Building2, Camera, FileText, Handshake, Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/Input";
-import { Textarea } from "@/components/ui/Textarea";
-import { Select } from "@/components/ui/Select";
-import { saveProspect } from "@/lib/prospects";
+export const metadata: Metadata = {
+  title: "Anuncie seu imóvel",
+  description:
+    "Proprietário: anuncie você mesmo seu imóvel no portal FGR Imóveis, sem mensalidade, e receba os contatos dos interessados direto no seu WhatsApp.",
+};
 
 const steps = [
   {
-    icon: Building2,
-    title: "Avaliação",
-    description:
-      "Nossa equipe avalia seu imóvel com base no mercado atual para definir o preço justo.",
+    icon: UserPlus,
+    title: "Crie sua conta",
+    description: "Leva um minuto: nome, WhatsApp e e-mail.",
   },
   {
     icon: Camera,
-    title: "Divulgação",
-    description:
-      "Fotografias profissionais e publicação em canais estratégicos para alcançar os compradores certos.",
+    title: "Cadastre o imóvel",
+    description: "Fotos, preço, endereço e descrição. Você mesmo preenche e edita quando quiser.",
   },
   {
-    icon: FileText,
-    title: "Negociação",
-    description:
-      "Intermediamos a negociação com transparência e cuidado, protegendo seus interesses.",
+    icon: CreditCard,
+    title: "Pague o anúncio",
+    description: "Pagamento único no cartão, sem mensalidade. O anúncio entra no ar na hora.",
   },
   {
-    icon: Handshake,
-    title: "Fechamento",
-    description:
-      "Cuidamos de toda a documentação para garantir uma transação segura e tranquila.",
+    icon: MessageCircle,
+    title: "Fale com os interessados",
+    description: "Os contatos vão direto para o seu WhatsApp e para o seu painel. Sem intermediário.",
   },
 ];
 
-const propertyTypeOptions = [
-  { value: "casa", label: "Casa" },
-  { value: "apartamento", label: "Apartamento" },
-  { value: "cobertura", label: "Cobertura" },
-  { value: "studio", label: "Studio" },
-  { value: "terreno", label: "Terreno" },
-  { value: "comercial", label: "Comercial" },
-  { value: "condominio", label: "Condomínio" },
-  { value: "outro", label: "Outro" },
+const faq = [
+  {
+    q: "A FGR Imóveis vai vender meu imóvel?",
+    a: "Não. A FGR Imóveis é um portal: mostra o seu anúncio para quem procura imóvel na região. A conversa, a visita e a negociação são entre você e o interessado.",
+  },
+  {
+    q: "Quem recebe os contatos?",
+    a: "Você. O botão de WhatsApp do anúncio abre a conversa com o seu número, e as mensagens do formulário aparecem no seu painel.",
+  },
+  {
+    q: "O que acontece quando o prazo acaba?",
+    a: "O anúncio sai do ar, mas continua salvo no seu painel. Você pode renovar quando quiser, e o prazo novo se soma ao que ainda falta.",
+  },
+  {
+    q: "Sou corretor ou imobiliária. Posso usar?",
+    a: "Para profissionais temos planos mensais com vários anúncios.",
+  },
 ];
 
-export default function VendaSeuImovelPage() {
-  const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    name: "",
-    whatsapp: "",
-    email: "",
-    propertyType: "",
-    city: "",
-    neighborhood: "",
-    price: "",
-    message: "",
-  });
-
-  function handleChange(
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSending(true);
-    const ok = await saveProspect({
-      name: form.name,
-      phone: form.whatsapp,
-      email: form.email || undefined,
-      property_type: form.propertyType || undefined,
-      city: form.city || undefined,
-      neighborhood: form.neighborhood || undefined,
-      expected_price: form.price || undefined,
-      message: form.message || undefined,
-      source: "pagina_venda_seu_imovel",
-    });
-    setSending(false);
-    if (!ok) {
-      setError("Não foi possível enviar agora. Tente de novo ou fale conosco pelo WhatsApp.");
-      return;
-    }
-    setSubmitted(true);
-  }
+export default async function VendaSeuImovelPage() {
+  const plans = await listActivePlans("proprietario");
 
   return (
     <div className="min-h-screen pt-20 lg:pt-24">
@@ -104,178 +68,93 @@ export default function VendaSeuImovelPage() {
         />
         <div className="absolute inset-0 bg-neutral-950/65" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-300 mb-5">
-            Para proprietários
-          </p>
+          <p className="eyebrow-dark mb-5">Para proprietários</p>
           <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Seu imóvel merece ser{" "}
-            <span className="italic font-normal">apresentado</span>
-            <br />
-            da melhor forma.
+            Anuncie você mesmo o seu imóvel
           </h1>
           <p className="text-lg text-neutral-300 max-w-2xl mx-auto leading-relaxed">
-            A FGR Imóveis conecta seu imóvel às pessoas certas — com
-            profissionalismo, alcance e dedicação.
+            Coloque seu imóvel no portal FGR Imóveis e receba os interessados direto no seu WhatsApp.
+            Sem mensalidade e sem intermediário.
           </p>
+          <a href="#anuncios" className="btn btn-light mt-8 px-8 py-4">
+            Ver preços do anúncio
+          </a>
         </div>
       </section>
 
       {/* Como funciona */}
-      <section className="py-20 lg:py-28 bg-white">
+      <section className="py-20 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-4">
-              Simples e transparente
-            </p>
-            <h2 className="text-3xl font-bold text-neutral-900">
-              Como funciona o processo
-            </h2>
+            <p className="eyebrow mb-4">Simples e direto</p>
+            <h2 className="text-3xl font-bold text-neutral-900">Como funciona</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
-              <div key={step.title} className="relative">
+              <div key={step.title}>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 border border-neutral-200 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full border border-neutral-200 flex items-center justify-center shrink-0">
                     <step.icon size={18} className="text-neutral-700" />
                   </div>
-                  <span className="text-4xl font-bold text-neutral-100">
-                    0{index + 1}
-                  </span>
+                  <span className="text-4xl font-bold text-neutral-100">0{index + 1}</span>
                 </div>
-                <h3 className="text-base font-bold text-neutral-900 mb-2">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-neutral-500 leading-relaxed">
-                  {step.description}
-                </p>
+                <h3 className="text-base font-bold text-neutral-900 mb-2">{step.title}</h3>
+                <p className="text-sm text-neutral-500 leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Form */}
-      <section className="py-20 lg:py-28 bg-neutral-50">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-4">
-              Primeiro passo
-            </p>
-            <h2 className="text-3xl font-bold text-neutral-900">
-              Quero anunciar meu imóvel
-            </h2>
-            <p className="text-neutral-500 mt-3">
-              Preencha o formulário e nossa equipe entrará em contato para dar
-              continuidade.
-            </p>
+      {/* Anúncios avulsos */}
+      <section id="anuncios" className="py-20 lg:py-24 bg-neutral-50 scroll-mt-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-neutral-900">Escolha seu anúncio</h2>
+            <p className="text-neutral-500 mt-3">Pagamento único no cartão. Você renova só se precisar.</p>
           </div>
+          <PlanCards
+            plans={plans}
+            action={plan => (
+              <Link
+                href={`/anunciante/cadastro?tipo=proprietario&plano=${plan.id}`}
+                className={`btn w-full ${plan.highlighted ? "btn-dark" : "btn-outline"}`}
+              >
+                Anunciar meu imóvel
+              </Link>
+            )}
+          />
+          <p className="mt-6 text-center text-sm text-neutral-500">
+            Já anuncia aqui?{" "}
+            <Link href="/anunciante/login" className="font-semibold text-neutral-900 underline underline-offset-2">
+              Entrar no painel
+            </Link>
+          </p>
+        </div>
+      </section>
 
-          <div className="bg-white border border-neutral-100 p-8">
-            {submitted ? (
-              <div className="text-center py-10">
-                <CheckCircle2 size={52} className="text-neutral-900 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                  Solicitação recebida!
-                </h3>
-                <p className="text-neutral-500">
-                  Nossa equipe analisará as informações e entrará em contato em
-                  breve.
+      {/* Dúvidas */}
+      <section className="py-20 lg:py-24 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-neutral-900 text-center mb-10">Dúvidas comuns</h2>
+          <div className="divide-y divide-neutral-200 border-y border-neutral-200">
+            {faq.map(item => (
+              <div key={item.q} className="py-6">
+                <h3 className="font-semibold text-neutral-900">{item.q}</h3>
+                <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
+                  {item.a}
+                  {item.q.startsWith("Sou corretor") && (
+                    <>
+                      {" "}
+                      <Link href="/planos" className="font-semibold text-neutral-900 underline underline-offset-2">
+                        Ver planos para profissionais
+                      </Link>
+                    </>
+                  )}
                 </p>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <Input
-                    label="Nome completo"
-                    name="name"
-                    id="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="Seu nome"
-                    required
-                  />
-                  <Input
-                    label="WhatsApp"
-                    name="whatsapp"
-                    id="whatsapp"
-                    type="tel"
-                    value={form.whatsapp}
-                    onChange={handleChange}
-                    placeholder="(11) 99999-9999"
-                    required
-                  />
-                </div>
-                <Input
-                  label="E-mail"
-                  name="email"
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="seu@email.com"
-                  required
-                />
-                <Select
-                  label="Tipo do imóvel"
-                  name="propertyType"
-                  id="propertyType"
-                  value={form.propertyType}
-                  onChange={handleChange}
-                  options={propertyTypeOptions}
-                  placeholder="Selecione o tipo"
-                  required
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <Input
-                    label="Cidade"
-                    name="city"
-                    id="city"
-                    value={form.city}
-                    onChange={handleChange}
-                    placeholder="Cidade do imóvel"
-                    required
-                  />
-                  <Input
-                    label="Bairro"
-                    name="neighborhood"
-                    id="neighborhood"
-                    value={form.neighborhood}
-                    onChange={handleChange}
-                    placeholder="Bairro"
-                  />
-                </div>
-                <Input
-                  label="Valor pretendido (R$)"
-                  name="price"
-                  id="price"
-                  type="number"
-                  value={form.price}
-                  onChange={handleChange}
-                  placeholder="Ex: 500000"
-                />
-                <Textarea
-                  label="Mensagem"
-                  name="message"
-                  id="message"
-                  value={form.message}
-                  onChange={handleChange}
-                  placeholder="Informações adicionais sobre o imóvel (opcional)"
-                  rows={4}
-                />
-                {error && (
-                  <p className="bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
-                )}
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-700 transition-colors text-sm tracking-wide mt-2 disabled:opacity-60"
-                >
-                  {sending && <Loader2 size={16} className="animate-spin" />}
-                  {sending ? "Enviando..." : "Quero anunciar meu imóvel"}
-                </button>
-              </form>
-            )}
+            ))}
           </div>
         </div>
       </section>

@@ -21,10 +21,11 @@ export async function PUT(req: NextRequest, { params }: RouteContext) {
 
     try {
       await query(
-        `UPDATE plans SET name=?,slug=?,description=?,price=?,billing_interval=?,trial_days=?,
-          max_listings=?,max_featured=?,features=?,highlighted=?,active=?,display_order=?
+        `UPDATE plans SET name=?,slug=?,audience=?,description=?,price=?,billing_interval=?,duration_days=?,
+          trial_days=?,max_listings=?,max_featured=?,features=?,highlighted=?,active=?,display_order=?
          WHERE id=?`,
-        [p.name, p.slug, p.description, p.price, p.billing_interval, p.trial_days, p.max_listings,
+        [p.name, p.slug, p.audience, p.description, p.price, p.billing_interval, p.duration_days,
+          p.trial_days, p.max_listings,
           p.max_featured, p.features, p.highlighted, p.active, p.display_order, planId]
       );
     } catch (err: unknown) {
@@ -55,7 +56,9 @@ export async function PUT(req: NextRequest, { params }: RouteContext) {
       plan: fresh ? mapPlan(fresh) : null,
       stripeWarning,
       // Assinaturas existentes continuam no preço antigo até o anunciante trocar de plano
-      notice: priceChanged ? "O novo preço vale para novas assinaturas. Quem já assina continua no valor anterior." : null,
+      notice: priceChanged && old.billing_interval !== "once"
+        ? "O novo preço vale para novas assinaturas. Quem já assina continua no valor anterior."
+        : null,
     });
   } catch (e: unknown) {
     return planError(e, "Erro ao atualizar plano");

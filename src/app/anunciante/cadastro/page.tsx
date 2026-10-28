@@ -27,8 +27,9 @@ function SignupForm() {
   const router = useRouter();
   const params = useSearchParams();
   const planId = params.get("plano");
+  const presetKind = kinds.some(k => k.value === params.get("tipo")) ? params.get("tipo")! : "imobiliaria";
   const [form, setForm] = useState({
-    kind: "imobiliaria", name: "", company_name: "", document: "", creci: "",
+    kind: presetKind, name: "", company_name: "", document: "", creci: "",
     phone: "", email: "", password: "", acceptTerms: false,
   });
   const [error, setError] = useState("");
@@ -91,8 +92,8 @@ function SignupForm() {
             <input value={form.creci} onChange={e => set("creci", e.target.value)} className={inputCls} placeholder="Ex: 12345-J" />
           </Field>
         )}
-        <Field label="WhatsApp">
-          <input type="tel" value={form.phone} onChange={e => set("phone", e.target.value)} className={inputCls} placeholder="(19) 99999-9999" autoComplete="tel" />
+        <Field label={form.kind === "proprietario" ? "WhatsApp * (os interessados falam com você por aqui)" : "WhatsApp"}>
+          <input type="tel" required={form.kind === "proprietario"} value={form.phone} onChange={e => set("phone", e.target.value)} className={inputCls} placeholder="(19) 99999-9999" autoComplete="tel" />
         </Field>
       </div>
 
@@ -112,7 +113,7 @@ function SignupForm() {
 
       <button type="submit" disabled={loading} className="btn btn-dark w-full">
         {loading && <Loader2 size={16} className="animate-spin" />}
-        {loading ? "Criando conta..." : "Criar conta e escolher plano"}
+        {loading ? "Criando conta..." : form.kind === "proprietario" ? "Criar conta e continuar" : "Criar conta e escolher plano"}
       </button>
     </form>
   );

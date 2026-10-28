@@ -1,7 +1,7 @@
 import { queryOne, QueryParam } from "@/lib/db";
 import type { AdvertiserAccount } from "@/lib/advertiserAuth";
 import { getAdvertiserPlan } from "@/lib/advertiserAuth";
-import { isLiveStatus } from "@/lib/plans";
+import { isLiveAccount } from "@/lib/plans";
 
 const TRANSACTIONS = ["venda", "aluguel"];
 const TYPES = ["casa", "apartamento", "cobertura", "studio", "terreno", "comercial", "condominio"];
@@ -80,7 +80,7 @@ export async function checkPlanLimits(
   previous?: { id: number; status: string; featured: number }
 ): Promise<string | null> {
   const plan = await getAdvertiserPlan(account);
-  const live = isLiveStatus(account.subscription_status);
+  const live = isLiveAccount(account);
 
   const willBeActive = data.status !== "inativo";
   const wasActive = previous ? previous.status !== "inativo" : false;
@@ -88,7 +88,9 @@ export async function checkPlanLimits(
   const wasFeatured = previous ? Boolean(Number(previous.featured)) && wasActive : false;
 
   if (willBeActive && !wasActive && (!plan || !live)) {
-    return "Assine um plano para publicar anúncios. Você pode salvar como Inativo enquanto isso.";
+    return account.kind === "proprietario"
+      ? "Pague o anúncio para publicar. Você pode salvar como Inativo enquanto isso."
+      : "Assine um plano para publicar anúncios. Você pode salvar como Inativo enquanto isso.";
   }
 
   const excludeId = previous?.id ?? 0;
@@ -101,7 +103,10 @@ export async function checkPlanLimits(
   );
 
   if (willBeActive && !wasActive && plan?.max_listings != null && Number(usage?.listings ?? 0) >= Number(plan.max_listings)) {
-    return `Seu plano ${plan.name} permite ${plan.max_listings} anúncios ativos. Troque de plano ou inative outro anúncio.`;
+    const max = Number(plan.max_listings);
+    return max === 1
+      ? `${plan.name} permite 1 imóvel no ar. Inative o outro anúncio para publicar este.`
+      : `Seu plano ${plan.name} permite ${max} anúncios ativos. Troque de plano ou inative outro anúncio.`;
   }
   if (willBeFeatured && !wasFeatured && Number(usage?.featured ?? 0) >= Number(plan?.max_featured ?? 0)) {
     return plan && Number(plan.max_featured) > 0

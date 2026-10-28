@@ -12,7 +12,9 @@ interface Props {
 }
 
 function limitLabel(plan: Plan): string {
-  return plan.maxListings == null ? "Anúncios ilimitados" : `Até ${plan.maxListings} anúncios ativos`;
+  if (plan.maxListings == null) return "Anúncios ilimitados";
+  if (plan.maxListings === 1) return plan.billingInterval === "once" ? `1 imóvel no ar por ${plan.durationDays} dias` : "1 anúncio ativo";
+  return `Até ${plan.maxListings} anúncios ativos`;
 }
 
 export function PlanCards({ plans, currentPlanId, action }: Props) {
@@ -41,8 +43,11 @@ export function PlanCards({ plans, currentPlanId, action }: Props) {
             {plan.description && <p className="mt-2 text-sm text-neutral-500">{plan.description}</p>}
 
             <p className="mt-6 text-3xl font-bold text-neutral-900">
-              {plan.price === 0 ? "Grátis" : formatPlanPrice(plan.price, plan.billingInterval)}
+              {plan.price === 0 ? "Grátis" : formatPlanPrice(plan.price, plan.billingInterval, plan.durationDays)}
             </p>
+            {plan.billingInterval === "once" && plan.price > 0 && (
+              <p className="mt-1 text-sm text-neutral-500">Pagamento único, sem mensalidade</p>
+            )}
             {plan.trialDays > 0 && (
               <p className="mt-1 text-sm font-medium text-emerald-700">{plan.trialDays} dias grátis para testar</p>
             )}

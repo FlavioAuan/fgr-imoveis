@@ -2,14 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Loader2, Pencil, Plus, Star, Trash2, X } from "lucide-react";
-import type { Plan } from "@/lib/planTypes";
+import type { BillingInterval, Plan, PlanAudience } from "@/lib/planTypes";
 import { formatPlanPrice } from "@/lib/planTypes";
 
 interface PlanForm {
   name: string;
+  audience: PlanAudience;
   description: string;
   price: string;
-  billing_interval: "month" | "year";
+  billing_interval: BillingInterval;
+  duration_days: string;
   trial_days: string;
   max_listings: string;
   max_featured: string;
@@ -20,7 +22,7 @@ interface PlanForm {
 }
 
 const emptyForm: PlanForm = {
-  name: "", description: "", price: "", billing_interval: "month", trial_days: "0",
+  name: "", audience: "profissional", description: "", price: "", billing_interval: "month", duration_days: "60", trial_days: "0",
   max_listings: "", max_featured: "0", features: "", highlighted: false, active: true, display_order: "0",
 };
 
@@ -73,9 +75,11 @@ export default function PlanosPage() {
     setEditingId(plan.id);
     setForm({
       name: plan.name,
+      audience: plan.audience,
       description: plan.description ?? "",
       price: String(plan.price),
       billing_interval: plan.billingInterval,
+      duration_days: String(plan.durationDays || 60),
       trial_days: String(plan.trialDays),
       max_listings: plan.maxListings == null ? "" : String(plan.maxListings),
       max_featured: String(plan.maxFeatured),
@@ -130,7 +134,9 @@ export default function PlanosPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">Planos</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Planos que imobiliárias e corretores assinam para anunciar no portal</p>
+          <p className="text-sm text-neutral-500 mt-0.5">
+            Assinaturas para imobiliárias e corretores, e anúncios avulsos para proprietários
+          </p>
         </div>
         <button onClick={openNew} className="inline-flex items-center gap-2 bg-neutral-900 text-white px-4 py-2.5 text-sm font-medium hover:bg-neutral-700 transition-colors">
           <Plus size={16} /> Novo plano
@@ -175,7 +181,10 @@ export default function PlanosPage() {
                     {plan.highlighted && <Star size={13} className="text-yellow-500" fill="currentColor" />}
                   </p>
                   <p className="text-lg font-bold text-neutral-900 mt-1">
-                    {plan.price === 0 ? "Grátis" : formatPlanPrice(plan.price, plan.billingInterval)}
+                    {plan.price === 0 ? "Grátis" : formatPlanPrice(plan.price, plan.billingInterval, plan.durationDays)}
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    {plan.audience === "proprietario" ? "Para proprietários" : "Para imobiliárias e corretores"}
                   </p>
                 </div>
                 <span className={`inline-flex px-2 py-0.5 text-xs font-medium ${plan.active ? "bg-green-100 text-green-700" : "bg-neutral-200 text-neutral-600"}`}>
@@ -190,7 +199,9 @@ export default function PlanosPage() {
               </ul>
 
               <div className="flex flex-wrap gap-2 text-xs">
-                <span className="bg-neutral-100 text-neutral-600 px-2 py-0.5">{plan.subscribers ?? 0} assinante{plan.subscribers === 1 ? "" : "s"}</span>
+                <span className="bg-neutral-100 text-neutral-600 px-2 py-0.5">
+                  {plan.subscribers ?? 0} {plan.billingInterval === "once" ? "anunciante" : "assinante"}{plan.subscribers === 1 ? "" : "s"}
+                </span>
                 {plan.price > 0 && (
                   <span className={`px-2 py-0.5 ${plan.stripeSynced ? "bg-indigo-50 text-indigo-700" : "bg-amber-50 text-amber-700"}`}>
                     {plan.stripeSynced ? "No Stripe" : "Ainda não está no Stripe"}
@@ -226,6 +237,12 @@ export default function PlanosPage() {
               <Field label="Nome *">
                 <input required value={form.name} onChange={e => set("name", e.target.value)} placeholder="Ex: Imobiliária" className={inputCls} />
               </Field>
+              <Field label="Para quem">
+                <select value={form.audience} onChange={e => set("audience", e.target.value as PlanAudience)} className={inputCls}>
+                  <option value="profissional">Imobiliárias e corretores (página /planos)</option>
+                  <option value="proprietario">Proprietários (página Venda seu imóvel)</option>
+                </select>
+              </Field>
               <Field label="Descrição curta">
                 <input value={form.description} onChange={e => set("description", e.target.value)} placeholder="Para quem é este plano" className={inputCls} />
               </Field>
@@ -235,20 +252,28 @@ export default function PlanosPage() {
                   <input required inputMode="decimal" value={form.price} onChange={e => set("price", e.target.value)} placeholder="199,00" className={inputCls} />
                 </Field>
                 <Field label="Cobrança">
-                  <select value={form.billing_interval} onChange={e => set("billing_interval", e.target.value as "month" | "year")} className={inputCls}>
-                    <option value="month">Mensal</option>
-                    <option value="year">Anual</option>
+                  <select value={form.billing_interval} onChange={e => set("billing_interval", e.target.value as BillingInterval)} className={inputCls}>
+                    <option value="month">Assinatura mensal</option>
+                    <option value="year">Assinatura anual</option>
+                    <option value="once">Pagamento único (anúncio avulso)</option>
                   </select>
                 </Field>
+                {form.billing_interval === "once" && (
+                  <Field label="Vale por (dias) *" hint="Depois disso o anúncio sai do ar até renovar">
+                    <input type="number" min={1} required value={form.duration_days} onChange={e => set("duration_days", e.target.value)} className={inputCls} />
+                  </Field>
+                )}
                 <Field label="Anúncios ativos" hint="Vazio = ilimitado">
                   <input type="number" min={0} value={form.max_listings} onChange={e => set("max_listings", e.target.value)} className={inputCls} />
                 </Field>
                 <Field label="Anúncios em destaque">
                   <input type="number" min={0} value={form.max_featured} onChange={e => set("max_featured", e.target.value)} className={inputCls} />
                 </Field>
-                <Field label="Dias de teste grátis">
-                  <input type="number" min={0} max={730} value={form.trial_days} onChange={e => set("trial_days", e.target.value)} className={inputCls} />
-                </Field>
+                {form.billing_interval !== "once" && (
+                  <Field label="Dias de teste grátis">
+                    <input type="number" min={0} max={730} value={form.trial_days} onChange={e => set("trial_days", e.target.value)} className={inputCls} />
+                  </Field>
+                )}
                 <Field label="Ordem na página">
                   <input type="number" min={0} value={form.display_order} onChange={e => set("display_order", e.target.value)} className={inputCls} />
                 </Field>

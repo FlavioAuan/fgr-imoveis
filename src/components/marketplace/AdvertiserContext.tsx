@@ -54,6 +54,7 @@ export const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
   incomplete_expired: { label: "Expirado", cls: "bg-neutral-200 text-neutral-600" },
   canceled: { label: "Cancelado", cls: "bg-neutral-200 text-neutral-600" },
   paused: { label: "Pausado", cls: "bg-neutral-200 text-neutral-600" },
+  expired: { label: "Vencido", cls: "bg-neutral-200 text-neutral-600" },
 };
 
 export function statusBadge(status: string | null | undefined) {
