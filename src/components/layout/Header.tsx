@@ -12,6 +12,7 @@ const navLinks = [
   { label: "Alugar", href: "/imoveis?tipo=aluguel" },
   { label: "Imóveis", href: "/imoveis" },
   { label: "Venda seu imóvel", href: "/venda-seu-imovel" },
+  { label: "Anuncie", href: "/planos" },
   { label: "Sobre nós", href: "/sobre" },
   { label: "Contato", href: "/contato" },
 ];

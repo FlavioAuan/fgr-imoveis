@@ -21,9 +21,13 @@ export async function signToken(payload: JWTPayload): Promise<string> {
     .sign(SECRET);
 }
 
+const ROLES: JWTPayload["role"][] = ["super_admin", "admin", "corretor"];
+
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, SECRET);
+    // Tokens de anunciante usam a mesma chave, mas não têm perfil de admin
+    if (payload.aud || !ROLES.includes(payload.role as JWTPayload["role"])) return null;
     return payload as unknown as JWTPayload;
   } catch {
     return null;

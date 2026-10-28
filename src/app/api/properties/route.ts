@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query, queryOne, QueryParam } from "@/lib/db";
-import { requireAuth } from "@/lib/auth";
+import { insert, query, queryOne, QueryParam } from "@/lib/db";
+import { getSession, requireAuth } from "@/lib/auth";
 import { auditLog } from "@/lib/audit";
 import { slugify } from "@/lib/utils";
+import { PUBLIC_LISTING_SQL } from "@/lib/plans";
 
 // GET — listagem pública e admin
 export async function GET(req: NextRequest) {
@@ -10,8 +11,8 @@ export async function GET(req: NextRequest) {
   const conditions: string[] = ["1=1"];
   const params: QueryParam[] = [];
 
-  const isAdmin = req.headers.get("x-admin") === "1";
-  if (!isAdmin) conditions.push("status = 'disponivel'");
+  const isAdmin = req.headers.get("x-admin") === "1" && Boolean(await getSession());
+  if (!isAdmin) conditions.push("status = 'disponivel'", PUBLIC_LISTING_SQL);
 
   if (p.get("transaction")) { conditions.push("transaction_type=?"); params.push(p.get("transaction")); }
   if (p.get("type")) { conditions.push("property_type=?"); params.push(p.get("type")); }
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
     const code = body.code || `FGR-${Date.now().toString().slice(-6)}`;
     const slug = body.slug || slugify(body.title);
 
-    const [result] = await query<{ insertId: number }>(
+    const insertedId = await insert(
       `INSERT INTO properties
        (code,slug,title,transaction_type,property_type,status,featured,price,
         condominium_fee,iptu,area,built_area,bedrooms,suites,bathrooms,parking_spaces,
@@ -96,9 +97,9 @@ export async function POST(req: NextRequest) {
         body.seo_title ?? null, body.seo_description ?? null, body.seo_keywords ?? null,
         body.agent_id ?? null, session.id,
       ]
-    ) as unknown as [{ insertId: number }];
+    );
 
-    const propertyId = result.insertId;
+    const propertyId = insertedId;
 
     // features
     if (Array.isArray(body.features) && body.features.length > 0) {

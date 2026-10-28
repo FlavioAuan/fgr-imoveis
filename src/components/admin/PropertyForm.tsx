@@ -51,7 +51,11 @@ const defaultForm: FormData = {
   youtube_url: "", virtual_tour_url: "", agent_id: "",
 };
 
-interface Props { id?: string; }
+interface Props {
+  id?: string;
+  /** "advertiser": painel do anunciante (sem SEO, código e corretor da FGR) */
+  mode?: "admin" | "advertiser";
+}
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -75,9 +79,13 @@ function Field({ label, required, children }: { label: string; required?: boolea
 const inputCls = "w-full border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-neutral-900 transition-colors bg-white";
 const selectCls = "w-full border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-neutral-900 transition-colors bg-white appearance-none";
 
-export default function PropertyForm({ id }: Props) {
+export default function PropertyForm({ id, mode = "admin" }: Props) {
   const router = useRouter();
   const isEdit = Boolean(id);
+  const isAdmin = mode === "admin";
+  const apiBase = isAdmin ? "/api/properties" : "/api/anunciante/imoveis";
+  const imagesBase = isAdmin ? `/api/properties/${id}/images` : `/api/anunciante/imoveis/${id}/imagens`;
+  const backHref = isAdmin ? "/admin/imoveis" : "/anunciante/imoveis";
 
   const [form, setForm] = useState<FormData>(defaultForm);
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -98,17 +106,17 @@ export default function PropertyForm({ id }: Props) {
   useEffect(() => {
     Promise.all([
       fetch("/api/features").then(r => r.json()),
-      fetch("/api/agents").then(r => r.json()),
+      isAdmin ? fetch("/api/agents").then(r => r.json()) : Promise.resolve([]),
     ]).then(([feats, agts]) => {
       setFeatures(Array.isArray(feats) ? feats : []);
       setAgents(Array.isArray(agts) ? agts : []);
     });
-  }, []);
+  }, [isAdmin]);
 
   // Load property for edit
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/properties/${id}`)
+    fetch(`${apiBase}/${id}`)
       .then(r => r.json())
       .then(data => {
         setForm({
@@ -145,7 +153,7 @@ export default function PropertyForm({ id }: Props) {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [id]);
+  }, [id, apiBase]);
 
   function toggleFeature(fid: number) {
     setSelectedFeatures(prev =>
@@ -176,7 +184,7 @@ export default function PropertyForm({ id }: Props) {
 
     try {
       const res = await fetch(
-        isEdit ? `/api/properties/${id}` : "/api/properties",
+        isEdit ? `${apiBase}/${id}` : apiBase,
         {
           method: isEdit ? "PUT" : "POST",
           headers: { "Content-Type": "application/json" },
@@ -190,7 +198,13 @@ export default function PropertyForm({ id }: Props) {
         return;
       }
 
-      router.push("/admin/imoveis");
+      // Anunciante segue para a edição do anúncio novo, onde envia as fotos
+      if (!isAdmin && !isEdit) {
+        const created = await res.json();
+        router.push(`/anunciante/imoveis/${created.id}?novo=1`);
+        return;
+      }
+      router.push(backHref);
     } catch {
       setError("Erro de conexão");
     } finally {
@@ -208,9 +222,13 @@ export default function PropertyForm({ id }: Props) {
       fileArr.forEach(f => fd.append("files", f));
       fd.append("property_id", id);
       fd.append("is_cover", "0");
-      await fetch("/api/upload", { method: "POST", body: fd });
+      const res = await fetch(isAdmin ? "/api/upload" : imagesBase, { method: "POST", body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setError(err.error || "Erro no envio das fotos");
+      }
       // Reload images
-      const updated = await fetch(`/api/properties/${id}`).then(r => r.json());
+      const updated = await fetch(`${apiBase}/${id}`).then(r => r.json());
       setImages(updated.images ?? []);
     } finally {
       setUploadLoading(false);
@@ -220,13 +238,13 @@ export default function PropertyForm({ id }: Props) {
   async function handleDeleteImage(imageId: number) {
     if (!id) return;
     if (!window.confirm("Excluir esta imagem?")) return;
-    await fetch(`/api/properties/${id}/images/${imageId}`, { method: "DELETE" });
+    await fetch(`${imagesBase}/${imageId}`, { method: "DELETE" });
     setImages(prev => prev.filter(img => img.id !== imageId));
   }
 
   async function handleSetCover(imageId: number) {
     if (!id) return;
-    await fetch(`/api/properties/${id}/images/${imageId}/cover`, { method: "PATCH" });
+    await fetch(`${imagesBase}/${imageId}`, { method: "PATCH" });
     setImages(prev => prev.map(img => ({ ...img, is_cover: img.id === imageId ? 1 : 0 })));
   }
 
@@ -264,7 +282,7 @@ export default function PropertyForm({ id }: Props) {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link
-          href="/admin/imoveis"
+          href={backHref}
           className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
         >
           <ArrowLeft size={16} />
@@ -272,7 +290,7 @@ export default function PropertyForm({ id }: Props) {
         </Link>
         <div className="h-4 w-px bg-neutral-300" />
         <h1 className="text-xl font-bold text-neutral-900">
-          {isEdit ? "Editar imóvel" : "Novo imóvel"}
+          {isEdit ? (isAdmin ? "Editar imóvel" : "Editar anúncio") : (isAdmin ? "Novo imóvel" : "Novo anúncio")}
         </h1>
       </div>
 
@@ -326,14 +344,14 @@ export default function PropertyForm({ id }: Props) {
             </select>
           </Field>
 
-          <Field label="Código">
+          {isAdmin && <Field label="Código">
             <input
               type="text" value={form.code}
               onChange={e => set("code", e.target.value)}
               placeholder="Deixe em branco para gerar automaticamente"
               className={inputCls}
             />
-          </Field>
+          </Field>}
 
           <div className="md:col-span-2 flex items-center gap-3">
             <input
@@ -445,7 +463,7 @@ export default function PropertyForm({ id }: Props) {
       )}
 
       {/* SECTION: SEO */}
-      <div className="bg-white border border-neutral-200 p-6 space-y-5">
+      {isAdmin && <div className="bg-white border border-neutral-200 p-6 space-y-5">
         <SectionTitle>SEO</SectionTitle>
         <div className="space-y-4">
           <Field label="Título SEO">
@@ -458,7 +476,7 @@ export default function PropertyForm({ id }: Props) {
             <input type="text" value={form.seo_keywords} onChange={e => set("seo_keywords", e.target.value)} placeholder="palavra1, palavra2, palavra3" className={inputCls} />
           </Field>
         </div>
-      </div>
+      </div>}
 
       {/* SECTION: Outros */}
       <div className="bg-white border border-neutral-200 p-6 space-y-5">
@@ -470,14 +488,14 @@ export default function PropertyForm({ id }: Props) {
           <Field label="Tour virtual">
             <input type="url" value={form.virtual_tour_url} onChange={e => set("virtual_tour_url", e.target.value)} placeholder="https://..." className={inputCls} />
           </Field>
-          <Field label="Corretor responsável">
+          {isAdmin && <Field label="Corretor responsável">
             <select value={form.agent_id} onChange={e => set("agent_id", e.target.value)} className={selectCls}>
               <option value="">Nenhum</option>
               {agents.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
             </select>
-          </Field>
+          </Field>}
         </div>
       </div>
 
@@ -571,7 +589,7 @@ export default function PropertyForm({ id }: Props) {
       {/* Submit row */}
       <div className="flex items-center justify-between gap-4 pb-8">
         <Link
-          href="/admin/imoveis"
+          href={backHref}
           className="px-5 py-2.5 text-sm font-medium text-neutral-700 border border-neutral-300 hover:bg-neutral-50 transition-colors"
         >
           Cancelar
@@ -582,7 +600,7 @@ export default function PropertyForm({ id }: Props) {
           className="inline-flex items-center gap-2 bg-neutral-900 text-white px-6 py-2.5 text-sm font-medium hover:bg-neutral-700 transition-colors disabled:opacity-50"
         >
           {saving && <Loader2 size={15} className="animate-spin" />}
-          {saving ? "Salvando..." : isEdit ? "Salvar alterações" : "Criar imóvel"}
+          {saving ? "Salvando..." : isEdit ? "Salvar alterações" : isAdmin ? "Criar imóvel" : "Criar e adicionar fotos"}
         </button>
       </div>
     </form>

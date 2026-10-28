@@ -3,13 +3,14 @@ import { ArrowRight } from "lucide-react";
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import { query } from "@/lib/db";
 import { mapDBToProperty } from "@/lib/propertyMapper";
+import { PUBLIC_LISTING_SQL } from "@/lib/plans";
 
 export async function FeaturedProperties() {
   const rows = await query<Record<string, unknown>>(
     `SELECT p.*,
       (SELECT image_path FROM property_images WHERE property_id=p.id AND is_cover=1 LIMIT 1) AS cover_image
      FROM properties p
-     WHERE p.featured=1 AND p.status='disponivel'
+     WHERE p.featured=1 AND p.status='disponivel' AND ${PUBLIC_LISTING_SQL}
      ORDER BY p.created_at DESC
      LIMIT 8`
   );

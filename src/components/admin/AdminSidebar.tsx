@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Building2, Users, MessageSquare,
-  Settings, LogOut, ChevronRight, Star, UserCog,
+  Settings, LogOut, ChevronRight, Star, UserCog, KeyRound, CreditCard, Store,
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,9 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
   { label: "Imóveis", href: "/admin/imoveis", icon: Building2 },
   { label: "Leads", href: "/admin/leads", icon: MessageSquare },
+  { label: "Prospecção", href: "/admin/prospeccao", icon: KeyRound },
+  { label: "Anunciantes", href: "/admin/anunciantes", icon: Store },
+  { label: "Planos", href: "/admin/planos", icon: CreditCard },
   { label: "Corretores", href: "/admin/corretores", icon: Star },
   { label: "Usuários", href: "/admin/usuarios", icon: UserCog },
   { label: "Configurações", href: "/admin/configuracoes", icon: Settings },

@@ -7,6 +7,8 @@ import { mapDBToProperty } from "@/lib/propertyMapper";
 import { PropertyGallery } from "@/components/properties/PropertyGallery";
 import { PropertyContactForm } from "@/components/properties/PropertyContactForm";
 import { formatCurrency, formatArea } from "@/lib/utils";
+import { getWhatsAppUrl } from "@/lib/config";
+import { PUBLIC_LISTING_SQL } from "@/lib/plans";
 import { propertyTypeLabels, propertyTransactionLabels } from "@/types/property";
 
 export const dynamic = "force-dynamic";
@@ -34,10 +36,13 @@ export default async function PropertyPage({ params }: Props) {
   const { slug } = await params;
 
   const row = await queryOne<Record<string, unknown>>(
-    `SELECT p.*, a.name AS agent_name, a.phone AS agent_phone, a.email AS agent_email
+    `SELECT p.*, a.name AS agent_name, a.phone AS agent_phone, a.email AS agent_email,
+       ad.name AS advertiser_name, ad.company_name AS advertiser_company, ad.kind AS advertiser_kind,
+       ad.creci AS advertiser_creci, ad.phone AS advertiser_phone
      FROM properties p
      LEFT JOIN agents a ON a.id = p.agent_id
-     WHERE p.slug=? AND p.status='disponivel'
+     LEFT JOIN advertisers ad ON ad.id = p.advertiser_id
+     WHERE p.slug=? AND p.status='disponivel' AND ${PUBLIC_LISTING_SQL}
      LIMIT 1`,
     [slug]
   );
@@ -209,7 +214,32 @@ export default async function PropertyPage({ params }: Props) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-4">
+              {row.advertiser_id != null && (
+                <div className="border border-neutral-200 p-5">
+                  <p className="text-xs text-neutral-400 mb-1">Anunciado por</p>
+                  <p className="font-semibold text-neutral-900">
+                    {String(row.advertiser_company || row.advertiser_name)}
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-0.5">
+                    {row.advertiser_kind === "proprietario" ? "Proprietário" : row.advertiser_kind === "corretor" ? "Corretor" : "Imobiliária"}
+                    {row.advertiser_creci ? ` · CRECI ${String(row.advertiser_creci)}` : ""}
+                  </p>
+                  {row.advertiser_phone ? (
+                    <a
+                      href={getWhatsAppUrl(
+                        `Olá! Vi no portal FGR Imóveis o imóvel ${property.title} (Código: ${property.code}) e gostaria de mais informações.`,
+                        String(row.advertiser_phone)
+                      )}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-dark w-full mt-4"
+                    >
+                      Falar com o anunciante no WhatsApp
+                    </a>
+                  ) : null}
+                </div>
+              )}
               <PropertyContactForm
                 propertyTitle={property.title}
                 propertyCode={property.code}

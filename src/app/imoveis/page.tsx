@@ -5,6 +5,7 @@ import { PropertyFilters } from "@/components/properties/PropertyFilters";
 import { query } from "@/lib/db";
 import { QueryParam } from "@/lib/db";
 import { mapDBToProperty } from "@/lib/propertyMapper";
+import { PUBLIC_LISTING_SQL } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Imóveis",
@@ -17,7 +18,7 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 export default async function ImoveisPage({ searchParams }: Props) {
   const raw = await searchParams;
 
-  const conditions = ["p.status = 'disponivel'"];
+  const conditions = ["p.status = 'disponivel'", PUBLIC_LISTING_SQL];
   const params: QueryParam[] = [];
 
   const tipo      = typeof raw.tipo      === "string" ? raw.tipo      : null;

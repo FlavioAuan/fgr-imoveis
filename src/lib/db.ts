@@ -14,7 +14,7 @@ const pool = mysql.createPool({
 
 export default pool;
 
-export type QueryParam = string | number | boolean | null | undefined;
+export type QueryParam = string | number | boolean | Date | null | undefined;
 
 export async function query<T = unknown>(
   sql: string,
@@ -30,4 +30,10 @@ export async function queryOne<T = unknown>(
 ): Promise<T | null> {
   const rows = await query<T>(sql, params);
   return rows[0] ?? null;
+}
+
+/** Executa um INSERT e devolve o id gerado. */
+export async function insert(sql: string, params?: QueryParam[]): Promise<number> {
+  const [result] = await pool.execute(sql, params as never);
+  return (result as { insertId: number }).insertId;
 }
