@@ -21,7 +21,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — Imóveis de Alto Padrão`,
+    default: `${siteConfig.name} — Portal de imóveis de São João da Boa Vista`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     "casa",
     "apartamento",
     "São João da Boa Vista",
-    "alto padrão",
-    "imobiliária",
+    "portal de imóveis",
+    "anunciar imóvel",
   ],
   authors: [{ name: "FGR Imóveis" }],
   creator: "FGR Imóveis",

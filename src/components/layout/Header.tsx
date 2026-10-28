@@ -13,7 +13,7 @@ const navLinks = [
   { label: "Imóveis", href: "/imoveis" },
   { label: "Venda seu imóvel", href: "/venda-seu-imovel" },
   { label: "Para corretores", href: "/planos" },
-  { label: "Sobre nós", href: "/sobre" },
+  { label: "Sobre", href: "/sobre" },
   { label: "Contato", href: "/contato" },
 ];
 

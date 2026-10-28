@@ -9,13 +9,14 @@ export async function WhatsAppCTA() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 rounded-[28px] bg-neutral-900 px-8 py-12 sm:px-12 lg:py-14">
           <div className="max-w-xl">
-            <p className="eyebrow-dark mb-4">Fale com a gente</p>
+            <p className="eyebrow-dark mb-4">Fale com o portal</p>
             <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              Não achou o que procurava?
+              Ficou com alguma dúvida?
             </h2>
             <p className="text-neutral-300 leading-relaxed">
-              Conte pelo WhatsApp o que você precisa. A gente procura junto
-              com você e avisa assim que surgir o imóvel certo.
+              Chame a equipe do portal no WhatsApp para tirar dúvidas sobre o
+              site, os anúncios ou os planos. Para falar de um imóvel, use o
+              contato dentro do próprio anúncio.
             </p>
           </div>
           <a

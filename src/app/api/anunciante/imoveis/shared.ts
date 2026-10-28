@@ -12,6 +12,7 @@ export const ADVERTISER_FIELDS = [
   "title", "transaction_type", "property_type", "status", "featured", "price",
   "condominium_fee", "iptu", "area", "built_area", "bedrooms", "suites", "bathrooms", "parking_spaces",
   "description", "city", "state", "neighborhood", "address", "zipcode", "youtube_url", "virtual_tour_url",
+  "latitude", "longitude",
 ] as const;
 
 export type AdvertiserPropertyInput = Record<(typeof ADVERTISER_FIELDS)[number], QueryParam>;
@@ -25,6 +26,13 @@ function num(value: unknown): number | null {
 function text(value: unknown, max: number): string | null {
   const s = String(value ?? "").trim();
   return s ? s.slice(0, max) : null;
+}
+
+/** Coordenada dentro do Brasil, ou null. */
+function coord(value: unknown, min: number, max: number): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= min && n <= max ? n : null;
 }
 
 function url(value: unknown): string | null {
@@ -66,6 +74,8 @@ export function parseAdvertiserProperty(body: Record<string, unknown>): { data: 
       zipcode: text(body.zipcode, 10),
       youtube_url: url(body.youtube_url),
       virtual_tour_url: url(body.virtual_tour_url),
+      latitude: coord(body.latitude, -34, 6),
+      longitude: coord(body.longitude, -74, -34),
     },
   };
 }

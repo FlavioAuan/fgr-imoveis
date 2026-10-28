@@ -3,9 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft, Star, Upload, X, ImageIcon, Loader2,
 } from "lucide-react";
+
+// Mapa só no navegador (Leaflet)
+const LocationPicker = dynamic(() => import("@/components/map/LocationPicker"), {
+  ssr: false,
+  loading: () => <div className="h-72 w-full border border-neutral-300 bg-neutral-50 animate-pulse" />,
+});
 
 interface Feature { id: number; name: string; }
 interface Agent { id: number; name: string; }
@@ -39,6 +46,8 @@ interface FormData {
   youtube_url: string;
   virtual_tour_url: string;
   agent_id: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 const defaultForm: FormData = {
@@ -49,6 +58,7 @@ const defaultForm: FormData = {
   bedrooms: "0", suites: "0", bathrooms: "0", parking_spaces: "0",
   description: "", seo_title: "", seo_description: "", seo_keywords: "",
   youtube_url: "", virtual_tour_url: "", agent_id: "",
+  latitude: null, longitude: null,
 };
 
 interface Props {
@@ -101,6 +111,8 @@ export default function PropertyForm({ id, mode = "admin" }: Props) {
 
   const set = (key: keyof FormData, value: string | boolean) =>
     setForm(p => ({ ...p, [key]: value }));
+  const setLocation = (latitude: number | null, longitude: number | null) =>
+    setForm(p => ({ ...p, latitude, longitude }));
 
   // Load features and agents
   useEffect(() => {
@@ -147,6 +159,8 @@ export default function PropertyForm({ id, mode = "admin" }: Props) {
           youtube_url:      data.youtube_url ?? "",
           virtual_tour_url: data.virtual_tour_url ?? "",
           agent_id:         data.agent_id != null ? String(data.agent_id) : "",
+          latitude:         data.latitude != null ? Number(data.latitude) : null,
+          longitude:        data.longitude != null ? Number(data.longitude) : null,
         });
         setSelectedFeatures((data.features ?? []).map((f: Feature) => f.id));
         setImages(data.images ?? []);
@@ -373,13 +387,13 @@ export default function PropertyForm({ id, mode = "admin" }: Props) {
         <SectionTitle>Localização</SectionTitle>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Field label="Cidade" required>
-            <input type="text" required value={form.city} onChange={e => set("city", e.target.value)} placeholder="São Paulo" className={inputCls} />
+            <input type="text" required value={form.city} onChange={e => set("city", e.target.value)} placeholder="São João da Boa Vista" className={inputCls} />
           </Field>
           <Field label="Estado">
             <input type="text" maxLength={2} value={form.state} onChange={e => set("state", e.target.value.toUpperCase())} placeholder="SP" className={inputCls} />
           </Field>
           <Field label="Bairro">
-            <input type="text" value={form.neighborhood} onChange={e => set("neighborhood", e.target.value)} placeholder="Vila Madalena" className={inputCls} />
+            <input type="text" value={form.neighborhood} onChange={e => set("neighborhood", e.target.value)} placeholder="Centro" className={inputCls} />
           </Field>
           <Field label="CEP">
             <input type="text" value={form.zipcode} onChange={e => set("zipcode", e.target.value)} placeholder="00000-000" className={inputCls} />
@@ -389,6 +403,15 @@ export default function PropertyForm({ id, mode = "admin" }: Props) {
               <input type="text" value={form.address} onChange={e => set("address", e.target.value)} placeholder="Rua, número, complemento" className={inputCls} />
             </Field>
           </div>
+        </div>
+        <div className="pt-2">
+          <p className="text-sm font-medium text-neutral-700 mb-2">Local no mapa</p>
+          <LocationPicker
+            lat={form.latitude}
+            lng={form.longitude}
+            onChange={setLocation}
+            addressQuery={[form.address, form.neighborhood, form.city, form.state, "Brasil"].filter(Boolean).join(", ")}
+          />
         </div>
       </div>
 

@@ -14,6 +14,7 @@ import { siteConfig, formatWhatsApp } from "@/lib/config";
 import { useSiteContact, useWhatsAppUrl } from "@/components/providers/SiteContactProvider";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { saveLead } from "@/lib/leads";
 
 const hours = [
   siteConfig.businessHours.weekdays,
@@ -77,8 +78,20 @@ export default function ContatoPage() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  const [sending, setSending] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSending(true);
+    // Vai para Leads no painel admin, marcado como mensagem da página de contato
+    await saveLead({
+      name: form.name,
+      phone: form.whatsapp,
+      email: form.email,
+      message: [form.subject && `Assunto: ${form.subject}`, form.message].filter(Boolean).join("\n\n"),
+      source: "pagina_contato",
+    });
+    setSending(false);
     setSubmitted(true);
   }
 
@@ -88,12 +101,13 @@ export default function ContatoPage() {
       <section className="bg-neutral-950 text-white py-16 lg:py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-xs font-semibold tracking-[0.3em] uppercase text-neutral-400 mb-4">
-            Estamos aqui para ajudar
+            Fale com o portal
           </p>
           <h1 className="text-4xl lg:text-5xl font-bold mb-4">Contato</h1>
           <p className="text-neutral-300 text-lg max-w-xl mx-auto">
-            Fale com nossa equipe. Estamos prontos para ajudar você a encontrar
-            o imóvel ideal.
+            Dúvidas sobre o site, os anúncios ou os planos? Fale com a equipe
+            do portal. Para falar de um imóvel, use o contato dentro do
+            anúncio: a mensagem vai direto para quem anuncia.
           </p>
         </div>
       </section>
@@ -184,7 +198,7 @@ export default function ContatoPage() {
                     Mensagem enviada!
                   </h3>
                   <p className="text-neutral-500">
-                    Responderemos o mais breve possível.
+                    A equipe do portal responde o mais breve possível.
                   </p>
                 </div>
               ) : (
@@ -226,7 +240,7 @@ export default function ContatoPage() {
                     id="cnt-subject"
                     value={form.subject}
                     onChange={handleChange}
-                    placeholder="Do que se trata?"
+                    placeholder="Ex.: anúncio, planos, problema no site"
                   />
                   <Textarea
                     label="Mensagem"
@@ -240,9 +254,10 @@ export default function ContatoPage() {
                   />
                   <button
                     type="submit"
-                    className="w-full bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-700 transition-colors text-sm tracking-wide mt-2"
+                    disabled={sending}
+                    className="w-full bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-700 transition-colors text-sm tracking-wide mt-2 disabled:opacity-60"
                   >
-                    Enviar mensagem
+                    {sending ? "Enviando..." : "Enviar mensagem"}
                   </button>
                 </form>
               )}

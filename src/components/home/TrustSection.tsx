@@ -3,28 +3,28 @@ import { MessagesSquare, UserRound, MapPinned, ShieldCheck, ArrowRight } from "l
 
 const values = [
   {
-    icon: MessagesSquare,
-    title: "Conversa franca",
+    icon: UserRound,
+    title: "Vários anunciantes, uma busca",
     description:
-      "Informações claras sobre valores, documentação e prazos, sem letras miúdas.",
+      "Imóveis de imobiliárias, corretores e proprietários no mesmo lugar.",
   },
   {
-    icon: UserRound,
-    title: "Atendimento próximo",
+    icon: MessagesSquare,
+    title: "Contato direto",
     description:
-      "Você fala sempre com a mesma pessoa, do primeiro contato à assinatura.",
+      "A mensagem e o WhatsApp vão para quem anuncia. Sem intermediário.",
   },
   {
     icon: MapPinned,
-    title: "Conhecimento da região",
+    title: "Tudo no mapa",
     description:
-      "Sabemos o que cada bairro oferece e ajudamos você a escolher bem.",
+      "Veja em que rua e bairro fica cada imóvel antes de marcar a visita.",
   },
   {
     icon: ShieldCheck,
-    title: "Negócio seguro",
+    title: "Anúncios autorizados",
     description:
-      "Conferimos a documentação e acompanhamos cada etapa com cuidado.",
+      "Quem anuncia declara ter autorização para anunciar cada imóvel.",
   },
 ];
 
@@ -43,34 +43,33 @@ export function TrustSection() {
                     "url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900&q=80')",
                 }}
                 role="img"
-                aria-label="Corretora apresentando um imóvel a clientes"
+                aria-label="Casa à venda com jardim"
               />
             </div>
             <div className="absolute bottom-5 left-5 right-5 sm:right-auto sm:max-w-xs rounded-2xl bg-white p-5 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)]">
               <p className="text-sm font-bold text-neutral-900">
-                Do primeiro café à entrega das chaves
+                Você escolhe, você conversa
               </p>
               <p className="mt-1 text-sm text-neutral-500">
-                A gente acompanha cada passo da sua mudança.
+                O contato é direto com quem anuncia o imóvel.
               </p>
             </div>
           </div>
 
           {/* Content */}
           <div>
-            <p className="eyebrow mb-4">Sobre a FGR</p>
+            <p className="eyebrow mb-4">Como funciona o portal</p>
             <h2 className="text-3xl lg:text-4xl font-bold text-neutral-900 leading-tight mb-6">
-              Gente daqui, cuidando do seu próximo endereço.
+              Os imóveis da região em um lugar só.
             </h2>
             <p className="text-neutral-600 leading-relaxed mb-4">
-              A FGR Imóveis conhece de perto São João da Boa Vista e a região:
-              os bairros mais tranquilos, as ruas mais procuradas e o que faz
-              cada imóvel valer a pena.
+              A FGR Imóveis é um portal de São João da Boa Vista e região. Aqui
+              imobiliárias, corretores e proprietários publicam seus imóveis, e
+              você encontra tudo em uma busca só, na lista ou no mapa.
             </p>
             <p className="text-neutral-600 leading-relaxed mb-10">
-              Nosso trabalho é simples: ouvir com atenção, mostrar opções que
-              fazem sentido para a sua vida e cuidar de tudo até você estar
-              com as chaves na mão.
+              Gostou de um imóvel? Fale direto com quem anuncia. A conversa, a
+              visita e a negociação são entre você e o anunciante.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-7 mb-10">
@@ -92,7 +91,7 @@ export function TrustSection() {
             </div>
 
             <Link href="/sobre" className="btn btn-dark">
-              Conheça nossa história
+              Saiba mais sobre o portal
               <ArrowRight size={16} />
             </Link>
           </div>

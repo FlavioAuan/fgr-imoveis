@@ -12,6 +12,7 @@
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "jose": "^5.10.0",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.31.0",
     "mysql2": "^3.23.3",
     "next": "15.1.7",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/leaflet": "^1.9.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

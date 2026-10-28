@@ -35,9 +35,9 @@ const priceRanges = [
 ];
 
 const highlights = [
-  "Atendimento feito por gente da região",
-  "Documentação conferida do início ao fim",
-  "Visitas no horário que for melhor para você",
+  "Imobiliárias, corretores e proprietários da região",
+  "Contato direto com quem anuncia",
+  "Busca em lista ou no mapa da cidade",
 ];
 
 export function Hero() {

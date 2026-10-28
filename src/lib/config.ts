@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "FGR Imóveis",
   description:
-    "Imóveis selecionados para quem busca qualidade, segurança e uma nova forma de viver.",
+    "Portal de imóveis de São João da Boa Vista e região: anúncios de imobiliárias, corretores e proprietários, com contato direto com quem anuncia.",
   url: "https://fgrimoveis.com.br",
 
   // Contato — substitua pelos dados reais
@@ -35,7 +35,7 @@ export const siteConfig = {
 
   // WhatsApp — mensagem padrão
   whatsappDefaultMessage:
-    "Olá! Vim através do site da FGR Imóveis e gostaria de mais informações.",
+    "Olá! Vim pelo portal FGR Imóveis e tenho uma dúvida.",
 };
 
 export const WHATSAPP_NUMBER = siteConfig.whatsapp;

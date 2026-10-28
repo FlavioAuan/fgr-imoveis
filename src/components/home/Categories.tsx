@@ -18,7 +18,7 @@ const categories = [
     label: "Terrenos",
     href: "/imoveis?categoria=terreno",
     image: "https://images.unsplash.com/photo-1500076656116-558758c991c1?w=800&q=80",
-    description: "Lotes e chácaras para construir do seu jeito",
+    description: "Lotes para construir do seu jeito",
   },
   {
     label: "Comercial",
@@ -33,10 +33,10 @@ const categories = [
     description: "Tranquilidade e lazer na porta de casa",
   },
   {
-    label: "Alto Padrão",
+    label: "Coberturas",
     href: "/imoveis?categoria=cobertura",
     image: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=1200&q=80",
-    description: "Acabamento e localização especiais",
+    description: "Mais espaço e vista do alto",
   },
 ];
 
@@ -50,8 +50,8 @@ export function Categories() {
             O que você está procurando?
           </h2>
           <p className="text-neutral-500 leading-relaxed">
-            Escolha uma categoria e veja as opções disponíveis em São João da
-            Boa Vista e nas cidades vizinhas.
+            Escolha uma categoria e veja os anúncios de São João da Boa Vista
+            e das cidades vizinhas.
           </p>
         </div>
 

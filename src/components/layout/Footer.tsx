@@ -9,8 +9,11 @@ import { formatWhatsApp } from "@/lib/config";
 const quickLinks = [
   { label: "Comprar", href: "/imoveis?tipo=venda" },
   { label: "Alugar", href: "/imoveis?tipo=aluguel" },
-  { label: "Venda seu imóvel", href: "/venda-seu-imovel" },
-  { label: "Sobre nós", href: "/sobre" },
+  { label: "Imóveis no mapa", href: "/#imoveis" },
+  { label: "Anuncie seu imóvel", href: "/venda-seu-imovel" },
+  { label: "Planos para corretores", href: "/planos" },
+  { label: "Área do anunciante", href: "/anunciante/login" },
+  { label: "Sobre o portal", href: "/sobre" },
   { label: "Contato", href: "/contato" },
 ];
 
@@ -25,9 +28,9 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Logo variant="light" height={48} className="mb-5" />
             <p className="text-neutral-400 text-sm leading-relaxed max-w-sm mt-4">
-              Imobiliária de São João da Boa Vista. Ajudamos você a comprar,
-              vender ou alugar com segurança e atendimento próximo, do
-              primeiro contato à entrega das chaves.
+              Portal de imóveis de São João da Boa Vista e região. Reúne
+              anúncios de imobiliárias, corretores e proprietários, com
+              contato direto com quem anuncia.
             </p>
             <div className="flex gap-4 mt-6">
               <a

@@ -10,7 +10,7 @@ import { PUBLIC_LISTING_SQL } from "@/lib/plans";
 export const metadata: Metadata = {
   title: "Imóveis",
   description:
-    "Encontre casas, apartamentos, terrenos e imóveis comerciais para compra ou aluguel. Imóveis selecionados pela FGR Imóveis.",
+    "Casas, apartamentos, terrenos e imóveis comerciais para comprar ou alugar em São João da Boa Vista e região, anunciados por imobiliárias, corretores e proprietários.",
 };
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -70,7 +70,7 @@ export default async function ImoveisPage({ searchParams }: Props) {
             {tipo ? `Imóveis para ${transactionLabel}` : "Todos os imóveis"}
           </h1>
           <p className="text-neutral-500 mt-1 text-sm">
-            Explore nossa seleção de imóveis cuidadosamente escolhidos
+            Anúncios de imobiliárias, corretores e proprietários da região
           </p>
         </div>
       </div>

@@ -94,7 +94,7 @@ export function PropertyContactForm({
       <p className="text-xs text-neutral-500 mb-5">
         {advertiserName
           ? `Sua mensagem vai direto para ${advertiserName}, que anuncia este imóvel.`
-          : "Preencha o formulário e entraremos em contato em breve."}
+          : "Preencha o formulário e a equipe do portal retorna em breve."}
       </p>
 
       {/* WhatsApp section */}
@@ -161,7 +161,7 @@ export function PropertyContactForm({
           <CheckCircle2 size={40} className="text-neutral-900 mx-auto mb-3" />
           <p className="font-semibold text-neutral-900 mb-1">Mensagem enviada!</p>
           <p className="text-xs text-neutral-500">
-            {advertiserName ? `${advertiserName} vai responder em breve.` : "Nossa equipe responderá em breve."}
+            {advertiserName ? `${advertiserName} vai responder em breve.` : "A equipe do portal responde em breve."}
           </p>
         </div>
       ) : (
