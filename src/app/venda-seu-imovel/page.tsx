@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Building2, Camera, FileText, Handshake } from "lucide-react";
+import { CheckCircle2, Building2, Camera, FileText, Handshake, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
+import { saveProspect } from "@/lib/prospects";
 
 const steps = [
   {
@@ -46,6 +47,8 @@ const propertyTypeOptions = [
 
 export default function VendaSeuImovelPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     name: "",
     whatsapp: "",
@@ -65,8 +68,26 @@ export default function VendaSeuImovelPage() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setSending(true);
+    const ok = await saveProspect({
+      name: form.name,
+      phone: form.whatsapp,
+      email: form.email || undefined,
+      property_type: form.propertyType || undefined,
+      city: form.city || undefined,
+      neighborhood: form.neighborhood || undefined,
+      expected_price: form.price || undefined,
+      message: form.message || undefined,
+      source: "pagina_venda_seu_imovel",
+    });
+    setSending(false);
+    if (!ok) {
+      setError("Não foi possível enviar agora. Tente de novo ou fale conosco pelo WhatsApp.");
+      return;
+    }
     setSubmitted(true);
   }
 
@@ -242,11 +263,16 @@ export default function VendaSeuImovelPage() {
                   placeholder="Informações adicionais sobre o imóvel (opcional)"
                   rows={4}
                 />
+                {error && (
+                  <p className="bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+                )}
                 <button
                   type="submit"
-                  className="w-full bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-700 transition-colors text-sm tracking-wide mt-2"
+                  disabled={sending}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-neutral-900 text-white font-semibold py-4 hover:bg-neutral-700 transition-colors text-sm tracking-wide mt-2 disabled:opacity-60"
                 >
-                  Quero anunciar meu imóvel
+                  {sending && <Loader2 size={16} className="animate-spin" />}
+                  {sending ? "Enviando..." : "Quero anunciar meu imóvel"}
                 </button>
               </form>
             )}

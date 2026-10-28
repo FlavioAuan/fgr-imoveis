@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, CheckCircle2, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, Loader2, X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
+import { saveProspect } from "@/lib/prospects";
 
 const propertyTypeOptions = [
   { value: "casa", label: "Casa" },
@@ -26,6 +27,8 @@ const sellBenefits = [
 export function SellProperty() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     name: "",
     whatsapp: "",
@@ -41,10 +44,26 @@ export function SellProperty() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // Aqui integrará com API/backend futuramente
+    setError("");
+    setSending(true);
+    const ok = await saveProspect({
+      name: form.name,
+      phone: form.whatsapp,
+      email: form.email || undefined,
+      property_type: form.propertyType || undefined,
+      city: form.city || undefined,
+      message: form.message || undefined,
+      source: "home_quero_vender",
+    });
+    setSending(false);
+    if (!ok) {
+      setError("Não foi possível enviar agora. Tente de novo ou fale conosco pelo WhatsApp.");
+      return;
+    }
     setSubmitted(true);
+    setForm({ name: "", whatsapp: "", email: "", propertyType: "", city: "", message: "" });
   }
 
   return (
@@ -197,11 +216,16 @@ export function SellProperty() {
                     placeholder="Conte um pouco sobre o imóvel: bairro, tamanho, diferenciais..."
                     rows={3}
                   />
+                  {error && (
+                    <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+                  )}
                   <button
                     type="submit"
+                    disabled={sending}
                     className="btn btn-dark w-full py-4 mt-2"
                   >
-                    Enviar meus dados
+                    {sending && <Loader2 size={16} className="animate-spin" />}
+                    {sending ? "Enviando..." : "Enviar meus dados"}
                   </button>
                 </form>
               )}
