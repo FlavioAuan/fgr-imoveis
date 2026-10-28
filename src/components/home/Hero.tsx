@@ -95,8 +95,8 @@ export function Hero() {
               Seu novo lar está mais perto do que você imagina
             </h1>
             <p className="max-w-lg text-base sm:text-lg text-neutral-200 leading-relaxed">
-              Casas, apartamentos, terrenos e chácaras com o atendimento de
-              quem conhece cada bairro da cidade.
+              Casas, apartamentos, terrenos, chácaras e imóveis comerciais em uma
+              busca só. Fale direto com quem anuncia.
             </p>
           </div>
         </div>
