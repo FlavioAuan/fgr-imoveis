@@ -24,9 +24,11 @@ interface Props {
   listings: MapListing[];
   /** Imóveis publicados sem ponto no mapa (só para o resumo) */
   withoutLocation?: number;
+  /** Esconde o painel de filtros (quando a página já tem filtros próprios) */
+  hideFilters?: boolean;
 }
 
-export function ListingsMap({ listings, withoutLocation = 0 }: Props) {
+export function ListingsMap({ listings, withoutLocation = 0, hideFilters = false }: Props) {
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const layerRef = useRef<LayerGroup | null>(null);
@@ -134,6 +136,13 @@ export function ListingsMap({ listings, withoutLocation = 0 }: Props) {
   return (
     <div className="space-y-4">
       {/* Filtros */}
+      {hideFilters ? (
+        withoutLocation > 0 && (
+          <p className="text-sm text-neutral-500">
+            {withoutLocation} {withoutLocation === 1 ? "imóvel sem localização aparece" : "imóveis sem localização aparecem"} só na lista.
+          </p>
+        )
+      ) : (
       <div className="rounded-3xl bg-white p-4 sm:p-5 ring-1 ring-neutral-200/70 space-y-4">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Tipo de imóvel">
           {typeCounts.map(([t, n]) => {
@@ -202,6 +211,7 @@ export function ListingsMap({ listings, withoutLocation = 0 }: Props) {
           {withoutLocation > 0 && ` · ${withoutLocation} sem localização aparecem só na lista`}
         </p>
       </div>
+      )}
 
       {/* Mapa */}
       <div className="relative isolate overflow-hidden rounded-[28px] ring-1 ring-neutral-200/70 bg-neutral-100">

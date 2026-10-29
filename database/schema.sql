@@ -309,6 +309,69 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
   KEY `idx_audit_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Imóveis do mercado (prospecção) — dados em migrations/2026-10-29-imoveis-mercado.sql
+CREATE TABLE IF NOT EXISTS `market_agencies` (
+  `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name`         VARCHAR(120) NOT NULL,
+  `website`      VARCHAR(255) NULL,
+  `phone`        VARCHAR(30) NULL,
+  `whatsapp`     VARCHAR(30) NULL,
+  `email`        VARCHAR(150) NULL,
+  `contact_name` VARCHAR(100) NULL,
+  `notes`        TEXT NULL,
+  `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_market_agencies_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `market_listings` (
+  `id`               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `agency_id`        INT UNSIGNED NOT NULL,
+  `category`         VARCHAR(40) NOT NULL,
+  `raw_type`         VARCHAR(80) NULL,
+  `neighborhood`     VARCHAR(150) NULL,
+  `price`            DECIMAL(15,2) NOT NULL,
+  `area`             DECIMAL(12,2) NULL,
+  `bedrooms`         TINYINT UNSIGNED NULL,
+  `url`              VARCHAR(255) NOT NULL,
+  `title`            VARCHAR(255) NULL,
+  `latitude`         DECIMAL(10,7) NULL,
+  `longitude`        DECIMAL(10,7) NULL,
+  `geo_precision`    ENUM('exata','bairro') NULL,
+  `status`           ENUM('novo','em_contato','negociando','captado','descartado') NOT NULL DEFAULT 'novo',
+  `owner_name`       VARCHAR(100) NULL,
+  `owner_phone`      VARCHAR(30) NULL,
+  `owner_email`      VARCHAR(150) NULL,
+  `notes`            TEXT NULL,
+  `next_followup_at` DATE NULL,
+  `last_contact_at`  DATETIME NULL,
+  `contacts_count`   INT UNSIGNED NOT NULL DEFAULT 0,
+  `collected_at`     DATE NULL,
+  `created_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_market_listings_url` (`url`),
+  KEY `idx_market_listings_agency` (`agency_id`),
+  KEY `idx_market_listings_status` (`status`),
+  CONSTRAINT `fk_market_listings_agency` FOREIGN KEY (`agency_id`) REFERENCES `market_agencies` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `market_contacts` (
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `listing_id`  INT UNSIGNED NOT NULL,
+  `target`      ENUM('imobiliaria','proprietario') NOT NULL,
+  `channel`     ENUM('telefone','whatsapp','email','visita','outro') NOT NULL,
+  `outcome`     ENUM('sem_resposta','retornar','interessado','sem_interesse','captado') NOT NULL,
+  `notes`       TEXT NULL,
+  `user_id`     INT UNSIGNED NULL,
+  `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_market_contacts_listing` (`listing_id`),
+  CONSTRAINT `fk_market_contacts_listing` FOREIGN KEY (`listing_id`) REFERENCES `market_listings` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_market_contacts_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- SEED INICIAL
 -- ============================================================

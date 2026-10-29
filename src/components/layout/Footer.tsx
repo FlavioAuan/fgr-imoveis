@@ -9,7 +9,7 @@ import { formatWhatsApp } from "@/lib/config";
 const quickLinks = [
   { label: "Comprar", href: "/imoveis?tipo=venda" },
   { label: "Alugar", href: "/imoveis?tipo=aluguel" },
-  { label: "Imóveis no mapa", href: "/#imoveis" },
+  { label: "Imóveis no mapa", href: "/#mapa" },
   { label: "Anuncie seu imóvel", href: "/venda-seu-imovel" },
   { label: "Planos para corretores", href: "/planos" },
   { label: "Área do anunciante", href: "/anunciante/login" },

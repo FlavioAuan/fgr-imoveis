@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
+import { LayoutGrid, Map as MapIcon } from "lucide-react";
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import { PropertyFilters } from "@/components/properties/PropertyFilters";
 import { query } from "@/lib/db";
 import { QueryParam } from "@/lib/db";
 import { mapDBToProperty } from "@/lib/propertyMapper";
 import { PUBLIC_LISTING_SQL } from "@/lib/plans";
+import { ListingsMapClient } from "@/components/map/ListingsMapClient";
+import type { MapListing } from "@/components/map/mapConfig";
+import type { PropertyType } from "@/types/property";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Imóveis",
@@ -30,6 +36,7 @@ export default async function ImoveisPage({ searchParams }: Props) {
   const areaMin   = typeof raw.areaMin   === "string" ? raw.areaMin   : null;
   const areaMax   = typeof raw.areaMax   === "string" ? raw.areaMax   : null;
   const ordenar   = typeof raw.ordenar   === "string" ? raw.ordenar   : "recentes";
+  const isMap     = raw.vista === "mapa";
 
   if (tipo)      { conditions.push("p.transaction_type=?"); params.push(tipo); }
   if (categoria) { conditions.push("p.property_type=?");   params.push(categoria); }
@@ -49,15 +56,69 @@ export default async function ImoveisPage({ searchParams }: Props) {
   const order = orderMap[ordenar] ?? "p.created_at DESC";
 
   const rows = await query<Record<string, unknown>>(
-    `SELECT p.*,
+    `SELECT p.*, COALESCE(ad.company_name, ad.name) AS advertiser,
       (SELECT image_path FROM property_images WHERE property_id=p.id AND is_cover=1 LIMIT 1) AS cover_image
      FROM properties p
+     LEFT JOIN advertisers ad ON ad.id = p.advertiser_id
      WHERE ${conditions.join(" AND ")}
      ORDER BY ${order}`,
     params
   );
 
   const properties = rows.map((row) => mapDBToProperty(row));
+
+  const located = rows.filter((r) => r.latitude != null && r.longitude != null);
+  const mapListings: MapListing[] = located.map((r) => ({
+    id: String(r.id),
+    slug: String(r.slug),
+    title: String(r.title),
+    type: String(r.property_type) as PropertyType,
+    transaction: r.transaction_type === "aluguel" ? "aluguel" : "venda",
+    price: Number(r.price),
+    bedrooms: Number(r.bedrooms ?? 0),
+    area: Number(r.area ?? 0),
+    neighborhood: String(r.neighborhood ?? ""),
+    city: String(r.city ?? ""),
+    lat: Number(r.latitude),
+    lng: Number(r.longitude),
+    cover: r.cover_image ? String(r.cover_image) : null,
+    advertiser: r.advertiser ? String(r.advertiser) : null,
+  }));
+
+  // Links do seletor Lista | Mapa mantendo os filtros atuais
+  function viewHref(view: "lista" | "mapa") {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(raw)) {
+      if (key !== "vista" && typeof value === "string" && value) params.set(key, value);
+    }
+    if (view === "mapa") params.set("vista", "mapa");
+    const qs = params.toString();
+    return qs ? `/imoveis?${qs}` : "/imoveis";
+  }
+
+  const viewToggle = (
+    <div className="flex rounded-full bg-white p-1 ring-1 ring-neutral-200" role="tablist" aria-label="Visualização dos imóveis">
+      {([
+        { value: "lista", label: "Lista", icon: LayoutGrid, active: !isMap },
+        { value: "mapa", label: "Mapa", icon: MapIcon, active: isMap },
+      ] as const).map((opt) => (
+        <Link
+          key={opt.value}
+          href={viewHref(opt.value)}
+          role="tab"
+          aria-selected={opt.active}
+          scroll={false}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-colors",
+            opt.active ? "bg-neutral-900 text-white" : "text-neutral-600 hover:text-neutral-900"
+          )}
+        >
+          <opt.icon size={16} />
+          {opt.label}
+        </Link>
+      ))}
+    </div>
+  );
 
   const transactionLabel =
     tipo === "aluguel" ? "Aluguel" : tipo === "venda" ? "Compra" : "Todos";
@@ -82,14 +143,22 @@ export default async function ImoveisPage({ searchParams }: Props) {
           </Suspense>
 
           <div className="flex-1 min-w-0">
-            <div className="hidden lg:flex items-center justify-between mb-6">
-              <p className="text-sm text-neutral-500">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <p className="hidden lg:block text-sm text-neutral-500">
                 <span className="font-semibold text-neutral-900">{properties.length}</span>{" "}
                 {properties.length === 1 ? "imóvel encontrado" : "imóveis encontrados"}
               </p>
+              {viewToggle}
             </div>
 
-            {properties.length === 0 ? (
+            {isMap && properties.length > 0 ? (
+              <ListingsMapClient
+                key={JSON.stringify(raw)}
+                listings={mapListings}
+                withoutLocation={properties.length - mapListings.length}
+                hideFilters
+              />
+            ) : properties.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-5xl mb-4">🏠</p>
                 <h2 className="text-xl font-semibold text-neutral-900 mb-2">

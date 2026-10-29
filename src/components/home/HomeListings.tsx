@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { ArrowRight, LayoutGrid, Map as MapIcon } from "lucide-react";
 import { PropertyCard } from "@/components/properties/PropertyCard";
@@ -9,11 +8,7 @@ import type { Property } from "@/types/property";
 import type { MapListing } from "@/components/map/mapConfig";
 import { cn } from "@/lib/utils";
 
-// O mapa usa o Leaflet, que só funciona no navegador
-const ListingsMap = dynamic(() => import("@/components/map/ListingsMap").then(m => m.ListingsMap), {
-  ssr: false,
-  loading: () => <div className="h-[min(640px,70vh)] min-h-[420px] rounded-[28px] bg-neutral-100 animate-pulse" />,
-});
+import { ListingsMapClient as ListingsMap } from "@/components/map/ListingsMapClient";
 
 type View = "lista" | "mapa";
 const STORAGE_KEY = "fgr_home_view";
@@ -32,6 +27,18 @@ export function HomeListings({ featured, mapListings, withoutLocation }: Props) 
     try {
       if (localStorage.getItem(STORAGE_KEY) === "mapa") setView("mapa");
     } catch {}
+  }, []);
+
+  // "#mapa" no endereço abre o mapa e rola até esta seção
+  useEffect(() => {
+    function openMapFromHash() {
+      if (window.location.hash !== "#mapa") return;
+      setView("mapa");
+      requestAnimationFrame(() => document.getElementById("imoveis")?.scrollIntoView({ behavior: "smooth" }));
+    }
+    openMapFromHash();
+    window.addEventListener("hashchange", openMapFromHash);
+    return () => window.removeEventListener("hashchange", openMapFromHash);
   }, []);
 
   function choose(next: View) {

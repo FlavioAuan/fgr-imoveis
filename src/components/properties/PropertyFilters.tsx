@@ -80,6 +80,7 @@ export function PropertyFilters({ count }: { count: number }) {
     Object.entries(updated).forEach(([key, val]) => {
       if (val) params.set(key, val);
     });
+    if (searchParams.get("vista") === "mapa") params.set("vista", "mapa");
     router.push(`/imoveis?${params.toString()}`);
   }
 
@@ -102,7 +103,7 @@ export function PropertyFilters({ count }: { count: number }) {
       ordenar: "recentes",
     };
     setFilters(clean);
-    router.push("/imoveis");
+    router.push(searchParams.get("vista") === "mapa" ? "/imoveis?vista=mapa" : "/imoveis");
   }
 
   const hasActiveFilters = Object.entries(filters).some(

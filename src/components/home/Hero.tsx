@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, MapPin, Search } from "lucide-react";
+import { ArrowRight, CheckCircle2, Map as MapIcon, MapPin, Search } from "lucide-react";
 
 const propertyTypes = [
   { value: "", label: "Todos os tipos" },
@@ -46,6 +46,13 @@ export function Hero() {
   const [type, setType] = useState("");
   const [city, setCity] = useState("");
   const [priceRange, setPriceRange] = useState("");
+
+  // Abre a seção de imóveis da home já no mapa (HomeListings escuta o "#mapa")
+  function openMap(e: React.MouseEvent) {
+    e.preventDefault();
+    if (window.location.hash === "#mapa") window.dispatchEvent(new HashChangeEvent("hashchange"));
+    else window.location.hash = "mapa";
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -98,6 +105,20 @@ export function Hero() {
               Casas, apartamentos, terrenos, chácaras e imóveis comerciais em uma
               busca só. Fale direto com quem anuncia.
             </p>
+            <a
+              href="#mapa"
+              onClick={openMap}
+              className="group mt-7 inline-flex items-center gap-3 rounded-full bg-white/95 py-2 pl-2 pr-5 text-sm font-semibold text-neutral-900 shadow-lg backdrop-blur transition-colors hover:bg-white"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white">
+                <MapIcon size={17} />
+              </span>
+              <span>
+                <span className="mr-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-emerald-800">Novo</span>
+                Encontre o imóvel ideal pelo mapa
+              </span>
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            </a>
           </div>
         </div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { X, ChevronLeft, ChevronRight, Search, Loader2, Trash2 } from "lucide-react";
+import { LeadsTabs } from "@/components/admin/LeadsTabs";
 
 interface Lead {
   id: number;
@@ -169,6 +170,8 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-6 max-w-6xl">
+      <LeadsTabs />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold text-neutral-900">Leads</h1>
